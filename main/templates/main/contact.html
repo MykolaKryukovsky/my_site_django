@@ -1,0 +1,75 @@
+{% extends "main/base.html" %}
+
+{% block title %}Контакти{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+
+        <h1 class="display-5 mb-4 text-center">{{ "Контактна інформація"|upper }}</h1>
+        <p class="lead text-center mb-5">Звертайтеся до нас! Ми завжди раді допомогти.</p>
+
+        <div class="row g-4">
+            <div class="col-md-5">
+                <div class="card h-100 border-0 shadow-sm bg-light">
+                    <div class="card-body p-4">
+                        <h4 class="mb-4">Наші контакти</h4>
+                        <ul class="list-unstyled">
+                            <li class="mb-3 d-flex align-items-center">
+                                <span class="badge bg-primary me-3 p-2">Email</span>
+
+                                <strong>{{ email|lower|default:"пошту не вказано" }}</strong>
+                            </li>
+                            <li class="mb-3 d-flex align-items-center">
+                                <span class="badge bg-primary me-3 p-2">Phone</span>
+
+                                <strong>{{ phone|default:"+380 00 000 00 00" }}</strong>
+                            </li>
+                            <li class="mb-3 d-flex align-items-center">
+                                <span class="badge bg-primary me-3 p-2">Address</span>
+                                <strong>{{ address|default:"Odesa, Ukraine" }}</strong>
+                            </li>
+                        </ul>
+                        <hr>
+                        <div class="mt-4">
+                            <h6>Графік роботи:</h6>
+
+                            <p class="mb-0">
+                                Офіс зараз:
+                                <span class="badge {% if is_open %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ is_open|yesno:"Відчинено,Зачинено" }}
+                                </span>
+                            </p>
+                            <p class="text-muted small mt-2">Пн — Пт: 9:00 - 18:00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7">
+
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body p-4">
+                        <h4 class="mb-4">Напишіть нам</h4>
+                        <form>
+                            <div class="mb-3">
+                                <label class="form-label">Ваше ім'я</label>
+                                <input type="text" class="form-control" placeholder="Іван Іванов">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Ваш Email</label>
+                                <input type="email" class="form-control" placeholder="name@example.com">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Повідомлення</label>
+                                <textarea class="form-control" rows="3"></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary w-100">Надіслати</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

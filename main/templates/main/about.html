@@ -1,0 +1,45 @@
+{% extends "main/base.html" %}
+
+{% block title %}Про нас{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Головна</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Про нас</li>
+                </ol>
+            </nav>
+
+            <h1 class="display-4 mb-4">{{ "Про наш проект"|upper }}</h1>
+
+            <div class="card border-0 shadow-sm bg-light p-4 mb-5">
+
+                <p class="lead">
+                    {{ project_description|safe }}
+                </p>
+            </div>
+
+            <h3 class="h2 mb-3 text-primary">Наша мета:</h3>
+            <div class="row g-4 mb-5">
+                {% for goal in goals|slice:":2" %}
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                        <div class="badge bg-primary p-2 me-3">{{ forloop.counter }}</div>
+                        <p>{{ goal|truncatechars:100 }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <hr class="my-4">
+
+            <p class="text-muted small">Останнє оновлення: {{ update_date|date:"d.m.Y"|default:"01.01.2024" }}</p>
+
+            <a href="{% url 'home' %}" class="btn btn-outline-dark">
+                <i class="bi bi-arrow-left"></i> ← Повернутися на головну
+            </a>
+        </div>
+    </div>
+{% endblock %}

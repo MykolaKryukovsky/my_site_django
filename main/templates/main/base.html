@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Мой Сайт{% endblock %}</title>
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <style>
+        body { display: flex; flex-direction: column; min-height: 100vh; }
+        main { flex: 1; }
+        .sticky-top { shadow: 0 2px 4px rgba(0,0,0,.1); }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: #6f42c1;">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'home' %}">Логотип</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">Главная</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link {% if 'services' in request.path %}active{% endif %}" href="{% url 'services' %}">Услуги</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'about' in request.path %}active{% endif %}" href="{% url 'about' %}">О нас</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'contact' in request.path %}active{% endif %}" href="{% url 'contact' %}">Контакты</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'profile' in request.path %}active{% endif %}" href="{% url 'profile_detail' username='JohnDoe' %}">Профіль</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'post' in request.path %}active{% endif %}" href="{% url 'post_detail' id='1' %}">Пост</a></li>
+                        <li class="nav-item"><a class="nav-link {% if 'event' in request.path %}active{% endif %}" href="{% url 'event_detail' year='2026' month='05' day='01' %}">Подія</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container my-5">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="bg-light text-center py-4 border-top">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 Ваша компанія. Усі права захищені.</p>
+        </div>
+    </footer>
+
+    <script src="https://jsdelivr.net"></script>
+</body>
+</html>

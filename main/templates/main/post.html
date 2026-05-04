@@ -1,0 +1,44 @@
+
+{% extends "main/base.html" %}
+
+{% block title %}Перегляд поста № {{ id }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Головна</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Пост № {{ id }}</li>
+            </ol>
+        </nav>
+
+        <article>
+            <header class="mb-4">
+                <h1 class="fw-bolder mb-1">Пост № {{ id }}</h1>
+                <div class="text-muted fst-italic mb-2">Опубліковано 4 травня 2026 року</div>
+                <!-- Категории/Теги -->
+                <a class="badge bg-secondary text-decoration-none link-light" href="#!">Django</a>
+                <a class="badge bg-secondary text-decoration-none link-light" href="#!">Tutorial</a>
+            </header>
+
+            <div class="card shadow-sm mb-5">
+                <div class="card-body p-4">
+                    <p class="fs-5 mb-4">Ви переглядаєте пост № <strong>{{ id }}</strong>.</p>
+                    <p>Тут відображається детальна інформація про вибрану публікацію. В реальному проекті дані для цього поста будуть завантажуватися з бази даних за допомогою переданого ID.</p>
+                    <p>Django дозволяє легко створювати такі сторінки, використовуючи динамічні URL-адреси. Це робить ваш сайт гнучким та масштабованим.</p>
+                </div>
+            </div>
+        </article>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary">&larr; До списку постів</a>
+            <div>
+                <button class="btn btn-primary">Редагувати</button>
+                <button class="btn btn-danger">Видалити</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

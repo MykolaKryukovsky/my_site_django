@@ -1,0 +1,62 @@
+{% extends "main/base.html" %}
+
+{% block title %}Головна сторінка{% endblock %}
+
+{% block content %}
+    <div class="jumbotron p-5 mb-4 bg-light rounded-3 shadow-sm">
+
+        <h1 class="display-5 fw-bold">{{ welcome_text|upper|default:"ВІТАЄМО НА САЙТІ!" }}</h1>
+
+        <p class="col-md-8 fs-4">{{ site_description|truncatechars:150 }}</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="h5 mb-0">{{ "Основні розділи"|upper }}</h3>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'about' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        Про нас
+                        <span class="badge bg-secondary rounded-pill">історія</span>
+                    </a>
+
+                    <a href="{% url 'services' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        Послуги
+                        <span class="badge bg-info rounded-pill">{{ services|length }} позицій</span>
+                    </a>
+                    <a href="{% url 'contact' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        Контакти
+                        <span class="badge bg-secondary rounded-pill">зв'язок</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="h5 mb-0">{{ "Динамічні маршрути"|upper }}</h3>
+                </div>
+                <div class="list-group list-group-flush">
+
+                    {% for post in posts|slice:":1" %}
+                    <a href="{% url 'post_detail' id=post.id %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-file-text"></i> {{ post.title }} <small class="text-muted">(ID: {{ post.id }})</small>
+                    </a>
+                    {% endfor %}
+
+                    <a href="{% url 'profile_detail' username='JohnDoe' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person"></i> Профіль {{ "JohnDoe"|lower }}
+                    </a>
+
+                    <a href="{% url 'event_detail' year='2026' month='05' day='01' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-calendar-event"></i> Спеціальна подія
+                        <small class="text-muted">({{ event_date|date:"d.m.Y"|default:"01.05.2026" }})</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,48 @@
+
+{% extends "main/base.html" %}
+
+{% block title %}Профіль користувача {{ username }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+
+        <div class="card shadow border-0">
+            <div class="card-body text-center p-5">
+
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-4"
+                     style="width: 100px; height: 100px; font-size: 2.5rem;">
+                    {{ username|first|upper }}
+                </div>
+
+                <h1 class="display-6 fw-bold">Профіль</h1>
+                <p class="fs-5 text-muted">Привіт, <span class="text-primary fw-bold">{{ username }}</span>!</p>
+
+                <div class="my-4">
+                    <p>Це ваша персональна сторінка профілю на нашому ресурсі. Тут ви можете керувати своїми налаштуваннями та переглядати активність.</p>
+                </div>
+
+                <hr>
+
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <button type="button" class="btn btn-primary px-4 gap-3">Налаштування</button>
+                    <button type="button" class="btn btn-outline-secondary px-4">Вийти</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 shadow-sm border-0">
+            <ul class="list-group list-group-flush rounded">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Статус
+                    <span class="badge bg-success rounded-pill">Active</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Дата реєстрації
+                    <span class="text-muted small">Травень 2026</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

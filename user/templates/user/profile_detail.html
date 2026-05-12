@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Профіль {{ target_user.username }}{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-auto">
+        <h2 class="fw-bold mb-0">Профіль користувача</h2>
+    </div>
+    {% if user == target_user %}
+    <div class="col text-end">
+        <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            Редагувати профіль
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row">
+
+    <div class="col-md-4 text-center mb-4 mb-md-0">
+        <div class="position-relative d-inline-block">
+            {% if target_user.profile.avatar %}
+                <img src="{{ target_user.profile.avatar.url }}"
+                     alt="Avatar"
+                     class="img-thumbnail rounded-circle shadow-sm"
+                     style="width: 180px; height: 180px; object-fit: cover;">
+            {% else %}
+                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto shadow-sm"
+                     style="width: 180px; height: 180px; border: 2px dashed #dee2e6;">
+                    <span class="text-muted">Немає фото</span>
+                </div>
+            {% endif %}
+        </div>
+        <h4 class="mt-3 fw-bold">@{{ target_user.username }}</h4>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card border-0 bg-light rounded-4 p-4">
+            <div class="row mb-3">
+                <div class="col-sm-4 text-muted">Email:</div>
+                <div class="col-sm-8 fw-medium">{{ target_user.email }}</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4 text-muted">Місто:</div>
+                <div class="col-sm-8">
+                    <span class="badge bg-white text-dark border fw-normal px-3 py-2">
+                        {{ target_user.profile.location|default:"Не вказано" }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4 text-muted">Дата народження:</div>
+                <div class="col-sm-8">{{ target_user.profile.birth_date|default:"Не вказано" }}</div>
+            </div>
+
+            <hr class="text-muted opacity-25">
+
+            <div class="mt-3">
+                <label class="text-muted d-block mb-2">Про себе:</label>
+                <div class="p-3 bg-white rounded-3 border-start border-primary border-4 shadow-sm">
+                    {{ target_user.profile.bio|linebreaksbr|default:"Користувач ще нічого не написав про себе." }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

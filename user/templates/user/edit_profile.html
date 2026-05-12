@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Редагування профілю{% endblock %}
+
+{% block content %}
+    <div class="mb-4">
+        <h2 class="fw-bold">Налаштування профілю</h2>
+        <p class="text-muted">Оновіть свою інформацію, щоб залишатися на зв'язку</p>
+        <hr>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger shadow-sm">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="row">
+            {% for field in form %}
+                <div class="col-12 mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label fw-medium">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text|safe }}</div>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in field.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <a href="{% url 'profile_view' user.username %}" class="btn btn-link text-decoration-none">
+                ← Скасувати
+            </a>
+            <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                Зберегти зміни
+            </button>
+        </div>
+    </form>
+
+    <script>
+        document.querySelectorAll('input, select, textarea').forEach(function(el) {
+
+            el.classList.add('form-control');
+
+            if (el.type === 'checkbox') {
+                el.classList.remove('form-control');
+                el.classList.add('form-check-input');
+            }
+
+            if (el.closest('.mb-3').querySelector('.invalid-feedback')) {
+                el.classList.add('is-invalid');
+            }
+        });
+    </script>
+{% endblock %}

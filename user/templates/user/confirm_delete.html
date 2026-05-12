@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Видалення акаунту{% endblock %}
+
+{% block content %}
+<div class="text-center py-3">
+
+    <div class="mb-4">
+        <div class="display-1 text-danger">
+            <i class="bi bi-exclamation-triangle"></i> <!-- Якщо використовуєте Bootstrap Icons -->
+            <span style="font-size: 64px;">⚠️</span> <!-- Або просто емодзі -->
+        </div>
+    </div>
+
+    <h1 class="h3 mb-3 fw-bold">Ви впевнені?</h1>
+
+    <div class="alert alert-danger border-0 shadow-sm mb-4">
+        <p class="mb-0">Ця дія є <strong>незворотною</strong>. Усі ваші дані, налаштування та профілі будуть видалені назавжди.</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+            <button type="submit" class="btn btn-danger btn-lg px-4 shadow-sm">
+                Так, видалити мій аккаунт
+            </button>
+            <a href="{% url 'profile_view' user.username %}" class="btn btn-outline-secondary btn-lg px-4">
+                Скасувати
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,6 +47,10 @@ INSTALLED_APPS = [
     'main',
     'board',
     'user',
+    'rest_framework',
+    'django_filters',
+    'drf_spectacular',
+    'books.apps.LibraryConfig',
 ]
 
 MIDDLEWARE = [
@@ -149,3 +154,38 @@ LOGOUT_REDIRECT_URL = '/' # Куди перенаправляти після в�
 # Додайте ці налаштування:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated', # Закриває всі API для гостей
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Термін дії токена доступу
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Термін дії токена оновлення
+    'AUTH_HEADER_TYPES': ('Bearer',),                # Тип заголовка в HTTP: Bearer <токен>
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Library Management REST API',
+    'DESCRIPTION': 'API для управління бібліотекою книг з підтримкою CRUD, фільтрації, пагінації та JWT-авторизації.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [{'BearerAuth': []}],
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': r'/api/',
+    'APPEND_COMPONENTS': {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            }
+        }
+    },
+}

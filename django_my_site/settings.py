@@ -9,24 +9,32 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
+from dotenv import load_dotenv
+
+from django.conf.global_settings import CSRF_USE_SESSIONS, SECURE_REFERRER_POLICY
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Загружаем переменные из файла .env (если он существует)
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+# --- НАСТРОЙКИ БЕЗОПАСНОСТИ ДЛЯ ПРОДАКШЕНА ---
+# Если переменная DEBUG в .env не задана, по умолчанию включается безопасный режим (False)
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ljc3@gtv959i6n2d5djf6%p2x*qf*_^asrt0c$r9rmneqa=ca8'
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY and not DEBUG:
+    raise ValueError("Критическая ошибка безопасности: SECRET_KEY не задан в .env!")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
 # Application definition
@@ -44,13 +52,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'main',
     'board',
     'user',
+    'books.apps.LibraryConfig',
+
     'rest_framework',
     'django_filters',
     'drf_spectacular',
-    'books.apps.LibraryConfig',
+    'django-secure',
+    'axes',
 ]
 
 MIDDLEWARE = [
@@ -62,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'django_my_site.urls'
@@ -69,7 +82,7 @@ ROOT_URLCONF = 'django_my_site.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -90,11 +103,11 @@ WSGI_APPLICATION = 'django_my_site.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'my_site_db',
-        'USER': 'postgres',
-        'PASSWORD': 'mypassword',
-        'HOST': 'localhost',
-        'PORT': '5433',
+        'NAME': os.getenv('DB_NAME', 'my_site_db'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'mypassword'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5433'),
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -135,6 +148,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles' # Папка, куда соберется статика при деплое
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
@@ -152,7 +168,6 @@ SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'  # Куди перенаправляти після успішного входу
 LOGOUT_REDIRECT_URL = '/' # Куди перенаправляти після виходу
 
-# Додайте ці налаштування:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -188,5 +203,71 @@ SPECTACULAR_SETTINGS = {
                 "bearerFormat": "JWT",
             }
         }
+    },
+}
+
+# --- ОПТИМИЗИРОВАННЫЕ НАСТРОЙКИ БЕЗОПАСНОСТИ ---
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+
+# Флаги кук: HttpOnly защищает от XSS атак
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_NAME = "sessionid_secure"
+SESSION_COOKIE_AGE = 1209600
+CSRF_USE_SESSIONS = False
+
+# Эти настройки активируются СТРОГО на продакшене (когда DEBUG = False), чтобы не ломать localhost
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_RELOAD = not DEBUG
+
+CSRF_TRUSTED_ORIGINS = ["https://pythonanywhere.com"]
+SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Хеширование паролей: Сначала идет более сильный Argon2, затем стандартный PBKDF2
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+]
+
+
+# Настройки AXES (Защита от подбора паролей)
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = timedelta(hours=1) # Исправлено: значение должно передаваться как объект timedelta
+AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True
+
+
+# Настройки отправки почты
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.getenv('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS')
+
+
+# Логирование ошибок безопасности в файл
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'error.log',
+        },
+    },
+    'loggers': {
+        'django.security': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
     },
 }

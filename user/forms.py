@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from typing import Any, Dict, Optional, Type
 from user.models import UserProfile
+import re
 
 
 class RegistrationForm(forms.ModelForm):

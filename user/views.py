@@ -27,7 +27,7 @@ def register_view(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('profile_view', username=request.user.username)
+            return redirect('profile_view', username=user.username)
     else:
         form = RegistrationForm()
     return render(request, 'register.html', {'form': form})
@@ -42,7 +42,7 @@ def edit_profile_view(request: HttpRequest) -> HttpResponse:
         Returns:
             Сторінка редагування профілю або редірект на перегляд профілю.
     """
-    profile = request.user.profile
+    profile = request.user.user_profile
 
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)

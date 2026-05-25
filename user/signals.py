@@ -29,4 +29,6 @@ def save_user_profile(sender: Type[User], instance: Any, **kwargs: Any) -> None:
             instance: Примірник користувача, який зберігається.
             **kwargs: Додаткові іменовані аргументи.
     """
-    instance.profile.save()
+    if hasattr(instance, 'userprofile'):
+        instance.userprofile.save()
+

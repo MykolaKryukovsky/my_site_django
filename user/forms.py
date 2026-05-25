@@ -3,9 +3,8 @@ from django import forms
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict
 from user.models import UserProfile
-import re
 
 
 class RegistrationForm(forms.ModelForm):
@@ -110,7 +109,7 @@ class CustomPasswordChangeForm(forms.Form):
         new_password = cleaned_data.get('new_password')
         confirm_password = cleaned_data.get('confirm_password')
 
-        if old_password and new_password and confirm_password == new_password:
+        if old_password and new_password and old_password == new_password:
             raise ValidationError('Password is same')
 
         if new_password and confirm_password and new_password != confirm_password:

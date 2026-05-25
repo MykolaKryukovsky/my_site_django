@@ -1,9 +1,10 @@
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Book
-from datetime import datetime
+from django.utils import timezone
 from typing import Any, Dict
+
+from .models import Book
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -60,7 +61,7 @@ class BookSerializer(serializers.ModelSerializer):
             Raises:
                 serializers.ValidationError: Якщо рік не проходить перевірку.
         """
-        current_year = datetime.now().year
+        current_year = timezone.now().year
         if value <= 0:
             raise serializers.ValidationError("Рік видання не може бути негативним чи нульовим.")
         if value > current_year:

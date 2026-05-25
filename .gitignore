@@ -26,3 +26,7 @@ pgdata/
 
 media/
 staticfiles/
+
+key.pem
+cert.pem
+mkcert.exe

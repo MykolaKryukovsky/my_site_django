@@ -5,19 +5,26 @@ from typing import Any
 from .models import Book
 
 
+from django.contrib import admin
+from .models import Book
+
+
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    """
-        Конфігурація адміністративної панелі Django для моделі Книги (Book).
-        Визначає зовнішній вигляд таблиці книг, поля для пошуку,
-        бічні фільтри, а також автоматизує заповнення поля автора запису.
-    """
+    """Кастомне налаштування відображення Книг в адмінці."""
     list_display = ('title', 'author', 'genre', 'publication_year', 'isbn', 'user', 'created_at')
-    list_display_links = ('title',)
+    list_display_links = ('title', 'isbn')
     list_filter = ('genre', 'publication_year', 'created_at')
-    search_fields = ('title', 'author', 'isbn')
-    readonly_fields = ('id', 'created_at', 'user')
-    ordering = ['-created_at']
+    search_fields = ('title', 'author', 'isbn', 'user__username')
+    fieldsets = (
+        ("Про книгу", {
+            'fields': ('id', 'title', 'author', 'genre', 'publication_year', 'isbn')
+        }),
+        ("Системна інформація", {
+            'fields': ('user', 'created_at')
+        }),
+    )
+    readonly_fields = ('id', 'created_at')
 
     def save_model(self, request: HttpRequest, obj: Book, form: Any, change: bool) -> None:
         """

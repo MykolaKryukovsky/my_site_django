@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.db import models
 import uuid
 
+from core.fields import UpperCaseCharField
+from core.managers import StatsManager
+
 
 class Book(models.Model):
     """
@@ -12,7 +15,7 @@ class Book(models.Model):
         посилання на користувача, який створив цей запис.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=255, verbose_name="Назва")
+    title = UpperCaseCharField(max_length=200, verbose_name="Назва книги")
     author = models.CharField(max_length=255, verbose_name="Автор")
     genre = models.CharField(max_length=100, verbose_name="Жанр")
     publication_year = models.IntegerField(verbose_name="Рік видання")
@@ -20,6 +23,7 @@ class Book(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Хто створив")
 
+    objects = StatsManager()
 
     def __str__(self) -> str:
         return f"{self.title} — {self.author}"

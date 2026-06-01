@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 
-from .forms import RegistrationForm, UserProfileForm, CustomPasswordChangeForm
+from .forms import RegistrationForm, UserProfileForm, CustomPasswordChangeForm, ProjectTeamForm
 
 
 def register_view(request: HttpRequest) -> HttpResponse:
@@ -110,3 +110,16 @@ def delete_account_view(request: HttpRequest) -> HttpResponse:
         messages.success(request, "Ваш обліковий запис успішно видалено.")
         return redirect('register')
     return render(request, 'confirm_delete.html')
+
+
+def create_project_team_view(request):
+    """Представлення для відображення та обробки форми команди."""
+    if request.method == 'POST':
+        form = ProjectTeamForm(request.POST)
+        if form.is_valid():
+            messages.success(request, "Команду проєкту успішно створено!")
+            return redirect('/')
+    else:
+        form = ProjectTeamForm()
+
+    return render(request, 'create_team.html', {'form': form})

@@ -57,11 +57,13 @@ INSTALLED_APPS = [
     'board',
     'user',
     'books.apps.LibraryConfig',
+    'core',
 
     'rest_framework',
     'django_filters',
     'drf_spectacular',
     'axes',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +76,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'axes.middleware.AxesMiddleware',
+    'core.middleware.CustomHeaderMiddleware',
+    'core.middleware.RequestMetricsMiddleware',
 ]
 
 ROOT_URLCONF = 'django_my_site.urls'
@@ -85,9 +89,11 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.global_site_stats',
             ],
         },
     },
@@ -250,22 +256,43 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv('EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS')
 
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
 
 # Логирование ошибок безопасности в файл
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[%(asctime)s] %(levelname)s: %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+    },
     'handlers': {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'error.log',
         },
+        'analytics_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'server_activity.log',
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
     },
     'loggers': {
         'django.security': {
             'handlers': ['file'],
             'level': 'ERROR',
+            'propagate': True,
+        },
+    'core_analytics': {
+            'handlers': ['analytics_file'],
+            'level': 'INFO',
             'propagate': True,
         },
     },

@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+from core.fields import UpperCaseCharField
+from core.managers import StatsManager
+
 
 def validate_positive_price(value: int) -> None:
     """Валідатор для цін"""
@@ -17,18 +20,23 @@ class Profile(models.Model):
     phone = models.CharField(max_length=11)
     address = models.TextField()
 
-    def __str__(self) -> None:
-        return self.user.username
+    def __str__(self) -> str:
+        return str(self.user.username)
 
 
 class Category(models.Model):
     """Модель Категорії"""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
+    color = UpperCaseCharField(
+        max_length=7,
+        default="#0D6EFD",
+        verbose_name="Колір категорії (HEX)"
+    )
 
     def active_ads_count(self) -> int:
         """Метод для підсчета активних оголошень"""
-        return self.ads.filter(active=True).count()
+        return self.ads.filter(is_active=True).count()
 
     def __str__(self) -> None:
         return self.name
@@ -36,16 +44,18 @@ class Category(models.Model):
 
 class Ad(models.Model):
     """Модель Оголошення"""
-    title = models.CharField(max_length=100)
+    title = UpperCaseCharField(max_length=150, verbose_name="Заголовок оголошення")
     description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[validate_positive_price])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ads')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='ads')
 
-    def short_description(self) -> models.TextField:
+    objects = StatsManager()
+
+    def short_description(self) -> str:
         """Метод короткого опису (до 100 символів)"""
         return self.description[:100] + "..." if len(self.description) > 100 else self.description
 
@@ -69,3 +79,6 @@ class Comment(models.Model):
     def get_comments_count(self) -> int:
         """Метод для підсчета коментарів до об'явлення"""
         return self.ad.comments.count()
+
+    def __str__(self) -> str:
+        return f"Коментар від {self.user.username} до {self.ad.title[:20]}"

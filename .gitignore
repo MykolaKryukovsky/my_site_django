@@ -30,3 +30,5 @@ staticfiles/
 key.pem
 cert.pem
 mkcert.exe
+cert.crt
+cert.key

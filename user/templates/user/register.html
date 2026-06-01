@@ -3,7 +3,7 @@
 
 {% block title %}Реєстрація - MySystem{% endblock %}
 
-{% block content %}
+{% block app_content %}
     <div class="text-center mb-4">
         <h1 class="h3 mb-3 fw-bold">Створити акаунт</h1>
         <p class="text-muted">Зареєструйтеся через соцмережі або за допомогою email</p>
@@ -66,8 +66,19 @@
     </form>
 
     <script>
-        document.querySelectorAll('input, select, textarea').forEach(function(el) {
-            el.classList.add('form-control');
+        document.querySelectorAll('.form-field-container').forEach(function(container) {
+            const element = container.querySelector('input, select, textarea');
+            if (!element) return;
+
+            if (element.tagName.toLowerCase() === 'select') {
+                element.classList.add('form-select');
+            } else {
+                element.classList.add('form-control');
+            }
+
+            if (container.getAttribute('data-has-errors') === 'true') {
+                element.classList.add('is-invalid');
+            }
         });
     </script>
 {% endblock %}

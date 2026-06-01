@@ -20,11 +20,21 @@ from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.routers import DefaultRouter
+from board import views as board_views
+from core.views import SystemDashboardView
+
+from board.views_api import AdViewSet
+
+
+router = DefaultRouter()
+router.register(r'board-ads', AdViewSet, basename='board-ad-api')
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
+    path('dashboard/', SystemDashboardView.as_view(), name='system_dashboard'),
     path('board/', include('board.urls')),
     path('accounts/', include('allauth.urls')),
     path('profile/', include('user.urls')),
@@ -34,6 +44,7 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api', include(router.urls)),
 ]
 
 if settings.DEBUG:

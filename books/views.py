@@ -1,5 +1,7 @@
 
 from rest_framework import generics, permissions, viewsets, filters
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth.models import User
 from rest_framework.serializers import BaseSerializer
@@ -37,9 +39,21 @@ class BookViewSet(viewsets.ModelViewSet):
             Автоматично прив'язує поточного автентифікованого користувача
             (автора запиту) до поля `user` створюваної книги.
             Args:
-                serializer (BaseSerializer): Екземпляр серіалізатора з валідованими даними.
+                serializer (BookSerializer): Екземпляр серіалізатора з валідованими даними.
         """
         serializer.save(user=self.request.user)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def stats(self, _request):
+        """
+        Повертає статистику з урахуванням переданих в URL параметрів фільтрації.
+        Приклад: /api/books/stats/?genre=Sci-Fi
+        """
+        queryset = self.get_queryset()
+        filtered_queryset = self.filter_queryset(queryset)
+        stats_data = filtered_queryset.get_counts_stats('author', 'genre')
+
+        return Response(stats_data)
 
 
 class RegisterView(generics.CreateAPIView):

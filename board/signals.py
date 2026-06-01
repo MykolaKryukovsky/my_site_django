@@ -28,6 +28,11 @@ def handle_ad_creation(sender: Type[Ad], instance: Ad, created: bool, **kwargs: 
             message=f'Ваше оголошення "{instance.title}" успішно опубліковано!',
             from_email='admin@board.com',
             recipient_list=[instance.user.email],
+            fail_silently=True,
         )
 
-    instance.deactivate_if_expired()
+    post_save.disconnect(handle_ad_creation, sender=Ad)
+    try:
+        instance.deactivate_if_expired()
+    finally:
+        post_save.connect(handle_ad_creation, sender=Ad)

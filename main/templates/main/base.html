@@ -24,6 +24,9 @@
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">Главная</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'dashboard' in request.path %}active{% endif %}" href="/dashboard/">Аналитика</a>
+                        </li>
                         <li class="nav-item"><a class="nav-link {% if 'services' in request.path %}active{% endif %}" href="{% url 'services' %}">Услуги</a></li>
                         <li class="nav-item"><a class="nav-link {% if 'about' in request.path %}active{% endif %}" href="{% url 'about' %}">О нас</a></li>
                         <li class="nav-item"><a class="nav-link {% if 'contact' in request.path %}active{% endif %}" href="{% url 'contact' %}">Контакты</a></li>

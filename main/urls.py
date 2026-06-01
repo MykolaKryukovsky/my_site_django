@@ -3,7 +3,7 @@ from . import views
 
 
 urlpatterns = [
-    path('home/', views.home_view, name='home'),
+    path('', views.home_view, name='home'),
     path('about/', views.about_view, name='about'),
 
     re_path(r'^post/(?P<id>\d+)/$', views.post_view, name='post_detail'),

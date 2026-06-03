@@ -7,23 +7,25 @@ from django.core.exceptions import ValidationError
 class HexColorField(forms.CharField):
     """
     Кастомне поле форми для валідації HEX-коду кольору (наприклад: #FFFFFF або #333).
-    Автоматично додає символ '#' на початок, якщо користувач його забув.
+    Автоматично додає символ '#' на початок, якщо користувач його забув,
+    та переводить символи у верхній регістр.
     """
 
-    def to_python(self, value):
+    def to_python(self, value: str) -> str:
         """Очищає вхідні дані: прибирає зайві пробіли та додає '#'."""
         value = super().to_python(value)
 
         if not value:
-            return ""
+            return value
 
         value = value.strip()
 
         if not value.startswith('#'):
             value = f"#{value}"
-        return value
 
-    def validate(self, value):
+        return value.upper()
+
+    def validate(self, value: str) -> None:
         """Перевіряє відповідність тексту стандарту HEX за допомогою регулярного виразу."""
         super().validate(value)
 

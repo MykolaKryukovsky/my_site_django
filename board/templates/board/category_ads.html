@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} - MySystem{% endblock %}
+
+{% block content %}
+<div class="w-100 py-3 text-start">
+
+    <a href="{% url 'board:index_view' %}" class="btn btn-light border btn-sm rounded-3 px-3 mb-4 text-muted shadow-sm">
+        <i class="bi bi-arrow-left me-1"></i> До всіх категорій
+    </a>
+
+    <div class="mb-4">
+        <h1 class="h2 fw-extrabold text-dark mb-1">
+            <i class="bi bi-tag-fill me-2" style="color: {{ category.color|default:'#0D6EFD' }};"></i>Категорія: {{ category.name }}
+        </h1>
+        <p class="text-muted small">Знайдено пропозицій: <strong>{{ cat_stats.total_count }}</strong> | Середня вартість товарів: <strong>{{ ad_stats.average_price|default:0|stringformat:".2f" }} грн</strong></p>
+    </div>
+
+    <div class="row g-3">
+        {% for ad in ads %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-9">
+                            <h5 class="h6 fw-bold text-dark mb-1">
+                                <a href="{% url 'board:ad_detail' ad.id %}" class="text-decoration-none text-dark">{{ ad.title }}</a>
+                            </h5>
+                            <p class="text-secondary small mb-0">{{ ad.short_description }}</p>
+                        </div>
+                        <div class="col-md-3 text-md-end text-start border-start border-light ps-md-4">
+                            <h4 class="h6 fw-extrabold text-primary mb-2">{{ ad.price }} грн</h4>
+                            <a href="{% url 'board:ad_detail' ad.id %}" class="btn btn-light border btn-sm w-100 rounded-3 text-muted">Детальніше</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm">
+                <p class="text-muted small mb-0">У цій категорії ще немає жодного активного оголошення.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

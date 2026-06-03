@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ad.title }} - MySystem{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center w-100 py-3 text-start">
+    <div class="col-lg-9 col-xl-8">
+
+        <a href="{% url 'board:index_view' %}" class="btn btn-light border btn-sm rounded-3 px-3 mb-4 text-muted shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> До всіх оголошень
+        </a>
+
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5 mb-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge rounded-2 px-2.5 py-1.5 fw-bold text-uppercase small" style="background-color: {{ ad.category.color|default:'#0D6EFD' }}20; color: {{ ad.category.color|default:'#0D6EFD' }};">
+                    {{ ad.category.name }}
+                </span>
+                <span class="text-muted small"><i class="bi bi-calendar3 me-1"></i> {{ ad.created_at|date:"d.m.Y" }}</span>
+            </div>
+
+            <h1 class="h2 fw-extrabold text-dark mb-3">{{ ad.title }}</h1>
+
+            <div class="mb-4">
+                <span class="text-muted small d-block mb-1">Вартість:</span>
+                <h2 class="display-6 fw-extrabold text-primary m-0">{{ ad.price }} <span class="fs-4 fw-normal text-muted">грн</span></h2>
+            </div>
+
+            <hr class="text-muted opacity-25 my-4">
+
+            <h5 class="h6 fw-bold text-dark text-uppercase mb-3" style="letter-spacing: 0.5px;">Опис товару</h5>
+            <p class="text-secondary mb-4" style="line-height: 1.6;">{{ ad.description|linebreaksbr }}</p>
+
+            <div class="p-3 bg-light rounded-3 border-start border-primary border-4 small text-secondary">
+                <i class="bi bi-person-circle me-1 text-muted"></i> Автор оголошення:
+                <a href="{% url 'board:user_profile' ad.user.username %}" class="fw-bold text-decoration-none text-dark">@{{ ad.user.username }}</a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+            <h5 class="h6 fw-bold text-dark text-uppercase mb-3" style="letter-spacing: 0.5px;">Коментарі та відгуки ({{ comments_count }})</h5>
+            <div class="d-flex flex-column gap-3">
+                {% for comment in comments %}
+                    <div class="bg-light rounded-3 p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-dark small">@{{ comment.user.username }}</span>
+                            <span class="text-muted" style="font-size: 0.75rem;">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+                        </div>
+                        <p class="text-secondary mb-0 small">{{ comment.content }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-muted small my-1">До цього оголошення ще немає жодного коментаря.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

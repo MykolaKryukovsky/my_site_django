@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Дошка оголошень - MySystem{% endblock %}
+
+{% block content %}
+<div class="w-100 py-3">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-extrabold text-dark mb-1">Дошка оголошень</h1>
+            <p class="text-muted small mb-0">Знайдено активних пропозицій: <span class="badge bg-primary-subtle text-primary rounded-pill fw-bold px-2 py-1">{{ ads.count }}</span></p>
+        </div>
+        <a href="#" class="btn btn-primary rounded-3 px-4 py-2 fw-semibold shadow-sm small">
+            <i class="bi bi-plus-circle me-1"></i> Подати оголошення
+        </a>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
+        <form method="get" action="{% url 'board:index_view' %}" class="row g-2 align-items-center">
+            {% if current_cat %}<input type="hidden" name="cat_id" value="{{ current_cat }}">{% endif %}
+            {% if current_min_price %}<input type="hidden" name="min_price" value="{{ current_min_price }}">{% endif %}
+            {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
+            <div class="col-12 col-md-9 col-lg-10">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 border rounded-start-3 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control bg-light border-start-0 border rounded-end-3 small" placeholder="Що ви шукаєте? (наприклад: смартфон, велосипед...)" value="{{ query|default:'' }}">
+                </div>
+            </div>
+            <div class="col-12 col-md-3 col-lg-2">
+                <button type="submit" class="btn btn-dark w-100 rounded-3 fw-medium">Знайти</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 sticky-lg-top" style="top: 90px; z-index: 10;">
+                <h5 class="h6 fw-bold text-dark text-uppercase mb-3" style="letter-spacing: 0.5px;">Фільтрація товарів</h5>
+                <form method="get" action="{% url 'board:index_view' %}" class="mb-4">
+                    {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                    {% if current_cat %}<input type="hidden" name="cat_id" value="{{ current_cat }}">{% endif %}
+                    {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
+                    <label class="form-label text-secondary small fw-medium mb-2">Мінімальна ціна (грн):</label>
+                    <div class="input-group mb-2">
+                        <input type="number" name="min_price" class="form-control form-control-sm rounded-start-3 bg-light border" min="0" placeholder="0" value="{{ current_min_price|default:'' }}">
+                        <button type="submit" class="btn btn-sm btn-primary rounded-end-3 px-3"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                </form>
+                <hr class="text-muted opacity-25 my-3">
+                <h5 class="h6 fw-bold text-dark text-uppercase mb-3" style="letter-spacing: 0.5px;">Категорії</h5>
+                <div class="d-flex flex-column gap-1">
+                    <a href="{% url 'board:index_view' %}" class="btn btn-sm text-start rounded-3 py-2 px-3 fw-medium {% if not current_cat %}btn-primary shadow-sm{% else %}btn-link text-secondary text-decoration-none hover-bg-light{% endif %}">
+                        <i class="bi bi-grid-1x2-fill me-2 small"></i> Всі категорії
+                    </a>
+                    {% for cat in categories %}
+                        <a href="{% url 'board:index_view' %}?cat_id={{ cat.id }}{% if query %}&q={{ query }}{% endif %}{% if current_min_price %}&min_price={{ current_min_price }}{% endif %}"
+                           class="btn btn-sm text-start rounded-3 py-2 px-3 fw-medium d-flex justify-content-between align-items-center {% if current_cat == cat.id %}btn-light text-primary border border-primary-subtle shadow-sm{% else %}btn-link text-secondary text-decoration-none hover-bg-light{% endif %}">
+                            <span>
+                                <i class="bi bi-circle-fill me-2 small" style="color: {{ cat.color|default:'#0D6EFD' }}; font-size: 0.65rem;"></i>
+                                {{ cat.name }}
+                            </span>
+                            <span class="badge bg-light text-muted border rounded-pill small fw-normal">{{ cat.active_ads_count }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+
+                {% if query or current_cat or current_min_price %}
+                    <div class="text-center mt-4">
+                        <a href="{% url 'board:index_view' %}" class="text-danger small text-decoration-none fw-semibold">
+                            <i class="bi bi-x-circle me-1"></i> Скинути всі фільтри
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3 px-1">
+                <span class="text-muted small fw-medium">Фінанси стрічки: <strong class="text-dark">{{ stats.total_sum|default:0 }} грн</strong> (Середня: {{ stats.average_price|default:0 }} грн)</span>
+
+                <div class="dropdown">
+                    <button class="btn btn-light btn-sm border dropdown-toggle rounded-3 px-3 shadow-sm text-secondary small fw-medium" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-sort-down me-1"></i> Сортування
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 small">
+                        <li><a class="dropdown-item {% if current_sort == '-created_at' %}active{% endif %}" href="?sort=-created_at{% if query %}&q={{ query }}{% endif %}{% if current_cat %}&cat_id={{ current_cat }}{% endif %}{% if current_min_price %}&min_price={{ current_min_price }}{% endif %}">Спочатку нові</a></li>
+                        <li><a class="dropdown-item {% if current_sort == 'price' %}active{% endif %}" href="?sort=price{% if query %}&q={{ query }}{% endif %}{% if current_cat %}&cat_id={{ current_cat }}{% endif %}{% if current_min_price %}&min_price={{ current_min_price }}{% endif %}">Від дешевих до дорогих</a></li>
+                        <li><a class="dropdown-item {% if current_sort == '-price' %}active{% endif %}" href="?sort=-price{% if query %}&q={{ query }}{% endif %}{% if current_cat %}&cat_id={{ current_cat }}{% endif %}{% if current_min_price %}&min_price={{ current_min_price }}{% endif %}">Від дорогих до дешевих</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row g-3">
+                {% for ad in ads %}
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden p-3 h-100 hover-shadow transition">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-9 text-start">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge rounded-2 px-2.5 py-1.5 fw-bold text-uppercase small" style="background-color: {{ ad.category.color|default:'#0D6EFD' }}20; color: {{ ad.category.color|default:'#0D6EFD' }};">
+                                            {{ ad.category.name }}
+                                        </span>
+                                        <span class="text-muted small"><i class="bi bi-calendar3 me-1"></i> {{ ad.created_at|date:"d.m.Y" }}</span>
+                                    </div>
+                                    <h5 class="h6 fw-bold text-dark mb-2">
+                                        <a href="{% url 'board:ad_detail' ad.id %}" class="text-decoration-none text-dark hover-primary-text">{{ ad.title }}</a>
+                                    </h5>
+                                    <p class="text-secondary small mb-0">{{ ad.short_description }}</p>
+                                </div>
+                                <div class="col-md-3 text-md-end text-start border-start border-light border-opacity-50 ps-md-4">
+                                    <div class="mb-2">
+                                        <span class="text-muted small d-block mb-1">Вартість:</span>
+                                        <h4 class="h5 fw-extrabold text-primary m-0">{{ ad.price }} <span class="fs-6 fw-normal text-muted">грн</span></h4>
+                                    </div>
+                                    <a href="{% url 'board:ad_detail' ad.id %}" class="btn btn-light border btn-sm w-100 rounded-3 text-muted fw-medium mt-1">Детальніше</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                     <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm">
+                        <i class="bi bi-folder-x display-3 text-muted opacity-50 mb-3 d-block"></i>
+                        <h5 class="fw-bold text-dark mb-1">Оголошень не знайдено</h5>
+                        <p class="text-muted small mb-0">Спробуйте змінити критерії пошуку або обрати іншу категорію.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-bg-light:hover { background-color: #f8f9fa !important; color: #0d6efd !important; }
+    .hover-shadow:hover { box-shadow: 0 4px 12px rgba(0,0,0,.075) !important; transition: box-shadow 0.2s ease-in-out; }
+    .hover-primary-text:hover { color: #0d6efd !important; }
+</style>
+{% endblock %}

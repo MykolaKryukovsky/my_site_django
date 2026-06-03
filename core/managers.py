@@ -1,6 +1,7 @@
-from django.db import models
+
+from django.db import models, connection
 from django.db.models import Sum, Avg, Count
-from django.core.exceptions import ValidationError
+from typing import List, Dict, Any
 
 
 class StatsQuerySet(models.QuerySet):
@@ -12,7 +13,7 @@ class StatsQuerySet(models.QuerySet):
             return self.filter(is_active=True)
         return self
 
-    def get_price_stats(self, price_field='price'):
+    def get_price_stats(self, price_field: str = 'price') -> Dict[str, Any]:
         """
         Універсальний метод для підрахунку статистики цін/витрат.
         Повертає словник із загальною сумою, середньою ціною та кількістю позицій.
@@ -23,7 +24,7 @@ class StatsQuerySet(models.QuerySet):
             total_count=Count('id')
         )
 
-    def get_counts_stats(self, *fields):
+    def get_counts_stats(self, *fields: str) -> Dict[str, Any]:
         """
         Універсальний метод для підрахунку унікальних значень.
         Приймає назви полів (наприклад, 'author', 'genre') і повертає кількість унікальних записів.
@@ -32,10 +33,18 @@ class StatsQuerySet(models.QuerySet):
         aggregations['total_count'] = Count('id')
         return self.aggregate(**aggregations)
 
-    def get_popular_categories_raw(self):
+
+class CustomStatsManager(models.Manager.from_queryset(StatsQuerySet)):
+    """
+    Кастомний менеджер, який автоматично наслідує всі класичні методи QuerySet
+    та додає ізольовані низькорівневі методи для виконання сирих SQL-запитів.
+    """
+
+    def get_popular_categories_raw(self) -> List[Dict[str, Any]]:
         """
         Універсальний кастомний SQL-запрос (Raw SQL).
-        Автоматично визначає точні імена таблиць у базі даних, запобігаючи помилці 500.
+        Автоматично визначає точні імена таблиць у базі даних, запобігаючи помилці 500,
+        та повертає чистий список словників, повністю сумісний із шаблоном та тестами.
         """
         try:
             category_table = self.model._meta.db_table
@@ -47,13 +56,19 @@ class StatsQuerySet(models.QuerySet):
         sql_query = f"""
             SELECT c.id, c.name, COUNT(a.id) AS total_ads
             FROM {category_table} c
-            LEFT JOIN {ad_table} a ON c.id = a.category_id
+            LEFT JOIN {ad_table} a ON c.id = a.category_id AND a.is_active = TRUE
             GROUP BY c.id, c.name
             ORDER BY total_ads DESC
             LIMIT 5;
         """
 
-        return self.model.objects.raw(sql_query)
+        with connection.cursor() as cursor:
+            cursor.execute(sql_query)
+            columns = [col[0] for col in cursor.description]
+            return [
+                dict(zip(columns, row))
+                for row in cursor.fetchall()
+            ]
 
 
-StatsManager = models.Manager.from_queryset(StatsQuerySet)
+StatsManager = CustomStatsManager

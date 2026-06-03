@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Помилка сервера (500) - MySystem{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 text-center bg-white w-full" style="max-width: 480px;">
+
+    <h1 class="display-1 fw-extrabold text-danger mb-2">500</h1>
+
+    <h2 class="h3 fw-bold text-dark mb-3">Внутрішня помилка сервера</h2>
+
+    <p class="text-muted mb-4">Щось пішло не так на нашому боці. Ми вже працюємо над виправленням цієї проблеми.</p>
+
+    <div class="d-grid gap-2">
+        <!-- Исправлено: указан корректный путь с пространством имен main:home -->
+        <a href="{% url 'main:home' %}" class="btn btn-light border py-2.5 fw-semibold shadow-sm rounded-3">
+            Спробувати знову
+        </a>
+    </div>
+
+</div>
+{% endblock %}

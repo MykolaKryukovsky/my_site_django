@@ -9,33 +9,29 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
+import sys
 import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 
-from django.conf.global_settings import CSRF_USE_SESSIONS, SECURE_REFERRER_POLICY
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Побудова шляхів всередині проєкту
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Загружаем переменные из файла .env (если он существует)
+# Автоматичне створення папки для логів, якщо її немає
+os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+
+# Завантаження змінних оточення з .env
 load_dotenv(BASE_DIR / '.env')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
 # --- НАСТРОЙКИ БЕЗОПАСНОСТИ ДЛЯ ПРОДАКШЕНА ---
-# Если переменная DEBUG в .env не задана, по умолчанию включается безопасный режим (False)
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY and not DEBUG:
     raise ValueError("Критическая ошибка безопасности: SECRET_KEY не задан в .env!")
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
-
 
 # Application definition
 
@@ -53,12 +49,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Ваші локальні додатки (Застосунки)
     'main',
     'board',
+    'core',
     'user',
     'books.apps.LibraryConfig',
-    'core',
 
+    # Сторонні пакети
     'rest_framework',
     'django_filters',
     'drf_spectacular',
@@ -67,17 +65,24 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # 1. Centralized Error Handling (Must be first!)
+    'user.middleware.ErrorHandlingMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
+
+    'user.middleware.AuditAccessMiddleware',
+
     'axes.middleware.AxesMiddleware',
     'core.middleware.CustomHeaderMiddleware',
     'core.middleware.RequestMetricsMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'django_my_site.urls'
@@ -101,10 +106,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'django_my_site.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
+# Database configuration (PostgreSQL)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -117,79 +119,63 @@ DATABASES = {
     }
 }
 
+# КРИТИЧНО НЕОБХІДНО: Налаштування кешу для лімітів @ratelimit та пакету Axes
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
 
 # Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = 'uk-ua'  # Українська мова для системних повідомлень та форм
+TIME_ZONE = 'Europe/Kyiv'
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles' # Папка, куда соберется статика при деплое
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Налаштування для django-allauth
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend', # Стандартний бекенд Django
-    'allauth.account.auth_backends.AuthenticationBackend', # Бекенд allauth
+    'django.contrib.auth.backends.ModelBackend',
+    'axes.backends.AxesStandaloneBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 SITE_ID = 1
 
-LOGIN_REDIRECT_URL = '/'  # Куди перенаправляти після успішного входу
-LOGOUT_REDIRECT_URL = '/' # Куди перенаправляти після виходу
+LOGIN_REDIRECT_URL = '/profile/'  # Куди перенаправляти після входу
+LOGOUT_REDIRECT_URL = '/profile/login/'  # Куди перенаправляти після виходу
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
+# Django REST Framework & Simple JWT
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated', # Закриває всі API для гостей
+        'rest_framework.permissions.IsAuthenticated',
     ),
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Термін дії токена доступу
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Термін дії токена оновлення
-    'AUTH_HEADER_TYPES': ('Bearer',),                # Тип заголовка в HTTP: Bearer <токен>
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 SPECTACULAR_SETTINGS = {
@@ -211,62 +197,54 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
+# Определяем, запущены ли тесты в данный момент
+IS_TESTING = 'test' in sys.argv
+
 # --- ОПТИМИЗИРОВАННЫЕ НАСТРОЙКИ БЕЗОПАСНОСТИ ---
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
+AXES_IP_WHITELIST = ['127.0.0.1']
 
-# Флаги кук: HttpOnly защищает от XSS атак
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_NAME = "sessionid_secure"
 SESSION_COOKIE_AGE = 1209600
 CSRF_USE_SESSIONS = False
 
-# Эти настройки активируются СТРОГО на продакшене (когда DEBUG = False), чтобы не ломать localhost
-SECURE_SSL_REDIRECT = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
-SECURE_HSTS_RELOAD = not DEBUG
+# Настройки SSL/HSTS отключаются при DEBUG или во время ТЕСТОВ
+if DEBUG or IS_TESTING:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_RELOAD = False
+else:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_RELOAD = True
 
-CSRF_TRUSTED_ORIGINS = ["https://pythonanywhere.com"]
+# ДОМЕНЫ ДЛЯ CSRF (Замените 'yourusername' на ваш реальный логин PythonAnywhere)
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.pythonanywhere.com",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000"
+]
+
 SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Хеширование паролей: Сначала идет более сильный Argon2, затем стандартный PBKDF2
-PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.Argon2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-]
-
-
-# Настройки AXES (Защита от подбора паролей)
-AXES_FAILURE_LIMIT = 5
-AXES_COOLOFF_TIME = timedelta(hours=1) # Исправлено: значение должно передаваться как объект timedelta
-AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True
-
-
-# Настройки отправки почты
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = os.getenv('EMAIL_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS')
-
-LOGS_DIR = os.path.join(BASE_DIR, 'logs')
-if not os.path.exists(LOGS_DIR):
-    os.makedirs(LOGS_DIR)
-
-# Логирование ошибок безопасности в файл
+# Об'єднана та виправлена система логування
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '[%(asctime)s] %(levelname)s: %(message)s',
+            'format': '[%(add_time)s] %(levelname)s: %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S'
         },
     },
@@ -274,14 +252,21 @@ LOGGING = {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'error.log',
+            'filename': BASE_DIR / 'logs/error.log',
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
         },
         'analytics_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'server_activity.log',
+            'filename': BASE_DIR / 'logs/server_activity.log',
             'formatter': 'verbose',
             'encoding': 'utf-8',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
     },
     'loggers': {
@@ -290,10 +275,15 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-    'core_analytics': {
-            'handlers': ['analytics_file'],
+        'core_analytics': {
+            'handlers': ['analytics_file', 'console'],
             'level': 'INFO',
-            'propagate': True,
+            'propagate': False,
+        },
+        'user.middleware': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
         },
     },
 }

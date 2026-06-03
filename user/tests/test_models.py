@@ -1,4 +1,3 @@
-
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
@@ -10,19 +9,12 @@ class UserProfileModelTest(TestCase):
     """Набір тестів для перевірки працездатності моделі UserProfile."""
 
     def setUp(self) -> None:
-        """
-        Підготовка початкових даних перед запуском кожного тесту.
-        Створює тестового користувача та його профіль.
-        """
-        self.user = User.objects.create_user(
-            username="testuser",
-            password="securepassword123"
-        )
-        self.profile = UserProfile.objects.create(
-            user=self.user,
-            bio="Розробник на Django.",
-            location="Київ"
-        )
+        """Підготовка початкових даних перед кожним тестом."""
+        self.user = User.objects.create_user(username="testuser", password="securepassword123")
+        self.profile, created = UserProfile.objects.get_or_create(user=self.user)
+        self.profile.bio = "Розробник на Django."
+        self.profile.location = "Київ"
+        self.profile.save()
 
     def test_profile_creation_and_fields(self) -> None:
         """Перевірка коректності створення профілю та збереження значення його полів."""
@@ -40,7 +32,7 @@ class UserProfileModelTest(TestCase):
     def test_one_to_one_relationship_uniqueness(self) -> None:
         """Перевірка обмеження OneToOneField: у одного користувача може бути лише один профіль."""
         with self.assertRaises(IntegrityError):
-            UserProfile.objects.create(user=self.user)
+            UserProfile.objects.create(user=self.user, bio="Другий профіль")
 
     def test_cascade_deletion(self) -> None:
         """Перевірка каскадного видалення: разом із користувачем має видалятися і його профіль."""

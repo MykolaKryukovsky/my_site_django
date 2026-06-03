@@ -1,68 +1,61 @@
 {% extends 'base.html' %}
 
-{% block title %}Редагування профілю{% endblock %}
+{% block title %}Редагування профілю - MySystem{% endblock %}
 
 {% block content %}
-    <div class="mb-4">
-        <h2 class="fw-bold">Налаштування профілю</h2>
-        <p class="text-muted">Оновіть свою інформацію, щоб залишатися на зв'язку</p>
-        <hr>
+<div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 bg-white w-full" style="max-width: 550px;">
+
+    <div class="text-center mb-4">
+        <h2 class="h3 fw-bold text-dark mb-2">Налаштування профілю</h2>
+        <p class="text-muted small">Оновіть свою інформацію, щоб залишатися на зв'язку</p>
     </div>
 
     <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-            <div class="alert alert-danger shadow-sm">
+            <div class="alert alert-danger shadow-sm py-2 mb-3">
                 {% for error in form.non_field_errors %}{{ error }}{% endfor %}
             </div>
         {% endif %}
 
-        <div class="row">
-            {% for field in form %}
-                <div class="col-12 mb-3">
-                    <label for="{{ field.id_for_label }}" class="form-label fw-medium">
-                        {{ field.label }}
-                    </label>
+        {% include 'includes/form_snippet.html' %}
 
-                    {{ field }}
-
-                    {% if field.help_text %}
-                        <div class="form-text">{{ field.help_text|safe }}</div>
-                    {% endif %}
-
-                    {% if field.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in field.errors %}{{ error }}{% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mt-4">
-            <a href="{% url 'profile_view' user.username %}" class="btn btn-link text-decoration-none">
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-2">
+            <a href="{% url 'user:profile_view' username=request.user.username %}" class="btn btn-link text-secondary text-decoration-none small">
                 ← Скасувати
             </a>
-            <button type="submit" class="btn btn-primary px-4 shadow-sm">
+            <button type="submit" class="btn btn-primary btn-lg px-4 shadow-sm rounded-3 fs-6 fw-semibold">
                 Зберегти зміни
             </button>
         </div>
     </form>
 
-    <script>
-        document.querySelectorAll('input, select, textarea').forEach(function(el) {
+</div>
 
-            el.classList.add('form-control');
+<script>
+    // Розумний скрипт для автоматичної стилізації полів Django під Bootstrap 5
+    document.querySelectorAll('.form-field-container').forEach(function(container) {
+        const element = container.querySelector('input, select, textarea');
+        if (!element) return;
 
-            if (el.type === 'checkbox') {
-                el.classList.remove('form-control');
-                el.classList.add('form-check-input');
-            }
+        // Визначаємо правильний клас залежно від типу поля
+        if (element.tagName.toLowerCase() === 'select') {
+            element.classList.add('form-select');
+        } else if (element.type === 'checkbox' || element.type === 'radio') {
+            element.classList.add('form-check-input');
+            // Переносимо чекбокс ліворуч від лейбла, якщо це потрібно для Bootstrap-стилю
+            container.classList.add('form-check');
+        } else if (element.type === 'file') {
+            element.classList.add('form-control');
+        } else {
+            element.classList.add('form-control');
+        }
 
-            if (el.closest('.mb-3').querySelector('.invalid-feedback')) {
-                el.classList.add('is-invalid');
-            }
-        });
-    </script>
+        // Обробка помилок валідації
+        if (container.getAttribute('data-has-errors') === 'true' || container.querySelector('.invalid-feedback')) {
+            element.classList.add('is-invalid');
+        }
+    });
+</script>
 {% endblock %}

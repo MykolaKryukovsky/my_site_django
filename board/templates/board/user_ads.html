@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Оголошення @{{ author.username }} - MySystem{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center w-100 py-3 text-start">
+    <div class="col-lg-9 col-xl-8">
+
+        <a href="{% url 'board:index_view' %}" class="btn btn-light border btn-sm rounded-3 px-3 mb-4 text-muted shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Повернутися до стрічки
+        </a>
+
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                    {{ author.username|first|upper }}
+                </div>
+                <div>
+                    <h1 class="h4 fw-extrabold text-dark mb-1">@{{ author.username }}</h1>
+                    <p class="text-muted small mb-0">Загальна вартість активів продавця: <strong class="text-dark">{{ user_stats.total_sum|default:0 }} грн</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="h6 fw-bold text-muted text-uppercase mb-3 px-1" style="letter-spacing: 0.5px;">Активні пропозиції ({{ user_stats.total_count }})</h3>
+
+        <div class="row g-3">
+            {% for ad in user_ads %}
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-9">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge rounded-2 px-2 py-1 small {% if ad.is_active %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                                        {% if ad.is_active %}Активне{% else %}Архів{% endif %}
+                                    </span>
+                                    <span class="text-muted small">{{ ad.created_at|date:"d.m.Y" }}</span>
+                                </div>
+                                <h5 class="h6 fw-bold text-dark mb-1">
+                                    <a href="{% url 'board:ad_detail' ad.id %}" class="text-decoration-none text-dark">{{ ad.title }}</a>
+                                </h5>
+                            </div>
+                            <div class="col-md-3 text-md-end text-start border-start border-light ps-md-4">
+                                <h4 class="h6 fw-extrabold text-primary mb-2">{{ ad.price }} грн</h4>
+                                <a href="{% url 'board:ad_detail' ad.id %}" class="btn btn-light border btn-sm w-100 rounded-3 text-muted">Переглянути</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-4 bg-white rounded-4 shadow-sm">
+                    <p class="text-muted small mb-0">У цього користувача немає активних оголошень.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

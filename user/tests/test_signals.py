@@ -19,6 +19,7 @@ class UserProfileSignalsTest(TestCase):
         self.assertTrue(UserProfile.objects.filter(user=user).exists())
 
         profile = user.user_profile
+
         self.assertIsNotNone(profile)
         self.assertEqual(profile.user, user)
 
@@ -28,15 +29,12 @@ class UserProfileSignalsTest(TestCase):
             username="updateuser",
             password="securepassword123"
         )
-
         profile = user.user_profile
         profile.bio = "Оновлена біографія через сигнал"
-        profile.save()
-
         user.email = "updateuser@example.com"
-        user.save()
+        user.save()  # Сигнал post_save должен автоматически вызвать profile.save() внутри себя
 
-        UserProfile.objects.filter(id=profile.id).update(bio="Змінено в обхід")
-        profile.refresh_from_db()
+        fresh_profile = UserProfile.objects.get(id=profile.id)
 
+        self.assertEqual(fresh_profile.bio, "Оновлена біографія через сигнал")
         self.assertEqual(user.email, "updateuser@example.com")

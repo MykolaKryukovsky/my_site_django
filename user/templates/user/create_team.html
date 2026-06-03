@@ -1,33 +1,55 @@
 {% extends 'base.html' %}
 
-{% block title %}Створення команди{% endblock %}
+{% block title %}Створення команди - MySystem{% endblock %}
 
 {% block content %}
-<h3 class="mb-4 text-center text-primary">Новий проєкт</h3>
+<div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 bg-white w-full" style="max-width: 500px;">
 
-<form method="post" novalidate>
-    {% csrf_token %}
+    <h3 class="h3 fw-bold text-center text-primary mb-4">Новий проєкт</h3>
 
-    {% for field in form %}
-        <div class="mb-3">
-            <label class="form-label font-weight-bold">{{ field.label }}</label>
+    <form method="post" novalidate>
+        {% csrf_token %}
 
-            <div class="input-group">
-                {{ field }}
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger shadow-sm py-2 mb-3">
+                {% for error in form.non_field_errors %}
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i> {{ error }}
+                {% endfor %}
             </div>
+        {% endif %}
 
-            {% if field.errors %}
-                <div class="text-danger small mt-1">
-                    {% for error in field.errors %}
-                        <i class="fa-solid fa-triangle-exclamation"></i> {{ error }}
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-    {% endfor %}
+        {% include 'includes/form_snippet.html' %}
 
-    <button type="submit" class="btn btn-primary w-100 mt-3">
-        <i class="fa-solid fa-circle-plus"></i> Створити команду
-    </button>
-</form>
+        <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm rounded-3 mt-4 fw-semibold">
+            <i class="fa-solid fa-circle-plus me-1"></i> Створити команду
+        </button>
+    </form>
+
+</div>
+
+<script>
+    // Скрипт автоматично додає класи Bootstrap 5 до полів форми Django
+    document.querySelectorAll('.form-field-container').forEach(function(container) {
+        const element = container.querySelector('input, select, textarea');
+        if (!element) return;
+
+        if (element.tagName.toLowerCase() === 'select') {
+            element.classList.add('form-select');
+        } else {
+            element.classList.add('form-control');
+        }
+
+        // Якщо є помилки, додаємо клас валідації Bootstrap
+        if (container.getAttribute('data-has-errors') === 'true' || container.querySelector('.invalid-feedback') || container.querySelector('.text-danger')) {
+            element.classList.add('is-invalid');
+
+            // Якщо у вашому сниппеті помилки виводяться через звичайний текст,
+            // додаємо іконку попередження Font Awesome динамічно (якщо її там немає)
+            const errorDiv = container.querySelector('.invalid-feedback, .text-danger');
+            if (errorDiv && !errorDiv.querySelector('.fa-triangle-exclamation')) {
+                errorDiv.insertAdjacentHTML('afterbegin', '<i class="fa-solid fa-triangle-exclamation me-1"></i> ');
+            }
+        }
+    });
+</script>
 {% endblock %}

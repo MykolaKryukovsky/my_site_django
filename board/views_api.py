@@ -12,7 +12,7 @@ class AdViewSet(viewsets.ModelViewSet):
     ViewSet для CRUD операцій над оголошеннями.
     Підтримує кастомні дозволи, фільтрацію, пошук та вкладені поля.
     """
-    queryset = Ad.objects.all().order_by('-created_at')
+    queryset = Ad.objects.all().select_related('category', 'user').order_by('-created_at')
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = {
@@ -21,6 +21,7 @@ class AdViewSet(viewsets.ModelViewSet):
         'price': ['gte', 'lte'],
     }
     search_fields = ['title', 'description']
+    ordering_fields = ['price', 'created_at']
 
     def get_serializer_class(self):
         """Динамічно обираємо серіалізатор: для деталей — розгорнутий, для списку — компактний."""
@@ -29,5 +30,5 @@ class AdViewSet(viewsets.ModelViewSet):
         return AdSerializer
 
     def perform_create(self, serializer):
-        """Автоматично прив'язуємо поточного користувача при створенні оголошення."""
+        """Автоматично прив'язуємо поточного користувача при створенні оголошення через API."""
         serializer.save(user=self.request.user)

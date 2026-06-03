@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель аналітики сервісу - MySystem{% endblock %}
+
+{% block content %}
+<div class="row w-100">
+
+    <div class="col-12 mb-4">
+        <div class="d-flex align-items-center justify-content-between p-4 bg-white rounded-4 shadow-sm border-start border-primary border-4" style="border-left-color: #6f42c1 !important;">
+            <div>
+                <h4 class="h5 mb-1 fw-bold text-dark">📊 Головна панель управління</h4>
+                <p class="text-muted small mb-1">Усього оброблено запитів сервером: <span class="badge bg-dark rounded-2 px-2 py-1">{{ total_server_requests }}</span></p>
+                <p class="text-muted small mb-0">Зведена статистика додатків сайту в реальному часі</p>
+            </div>
+            <div class="fs-2" style="color: #6f42c1;">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 bg-white border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="h6 card-title mb-0 fw-bold text-success text-uppercase" style="letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-rectangle-ad me-2"></i> Оголошення (Board)
+                </h5>
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 small fw-semibold">Додаток board</span>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <hr class="my-2 text-muted opacity-25">
+                <div class="d-flex justify-content-between align-items-center mb-3 small">
+                    <span class="text-muted fw-medium">Активних оголошень на сайті:</span>
+                    <span class="h5 mb-0 fw-extrabold text-dark">{{ ad_stats.total_count|default:0 }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3 small">
+                    <span class="text-muted fw-medium">Загальна вартість усіх товарів:</span>
+                    <span class="h5 mb-0 fw-extrabold text-dark">{{ ad_stats.total_sum|default:0 }} грн</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-0 small">
+                    <span class="text-muted fw-medium">Середня ціна пропозиції:</span>
+                    <span class="h5 mb-0 fw-extrabold text-success">{{ ad_stats.average_price|default:0|stringformat:".2f" }} грн</span>
+                </div>
+            </div>
+            <div class="card-footer bg-light border-0 py-3 px-4 text-end">
+                <a href="{% url 'board:index_view' %}" class="btn btn-sm btn-outline-success rounded-3 px-3 fw-medium shadow-sm">
+                    Перейти до дошки <i class="fa-solid fa-arrow-right ms-1 small"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 bg-white border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="h6 card-title mb-0 fw-bold text-info text-uppercase" style="letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-book me-2"></i> Бібліотека (Books)
+                </h5>
+                <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-1.5 small fw-semibold">Додаток books</span>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <hr class="my-2 text-muted opacity-25">
+                <div class="d-flex justify-content-between align-items-center mb-3 small">
+                    <span class="text-muted fw-medium">Всього книг у базі даних:</span>
+                    <span class="h5 mb-0 fw-extrabold text-dark">{{ book_stats.total_count|default:0 }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3 small">
+                    <span class="text-muted fw-medium">Кількість унікальних авторів:</span>
+                    <span class="h5 mb-0 fw-extrabold text-dark">{{ book_stats.distinct_author|default:0 }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-0 small">
+                    <span class="text-muted fw-medium">Представлено жанрів:</span>
+                    <span class="h5 mb-0 fw-extrabold text-info">{{ book_stats.distinct_genre|default:0 }}</span>
+                </div>
+            </div>
+            <div class="card-footer bg-light border-0 py-3 px-4 text-end">
+                <span class="text-muted small fw-medium"><i class="fa-solid fa-circle-check text-info me-1"></i> Аналітика DRF інтегрована</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-2">
+        <div class="card bg-white border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="h6 card-title mb-0 fw-bold text-dark text-uppercase" style="letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-fire text-danger me-2"></i> Популярні категорії (Raw SQL Запит)
+                </h5>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 small fw-semibold">Топ-5 за кількістю оголошень</span>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <hr class="my-2 text-muted opacity-25">
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 100px;" class="text-secondary fw-bold">ID</th>
+                                <th class="text-secondary fw-bold">Назва категорії</th>
+                                <th class="text-center text-secondary fw-bold" style="width: 250px;">Кількість оголошень</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat in popular_categories %}
+                                <tr>
+                                    <td><span class="text-muted font-monospace">#{{ cat.id }}</span></td>
+                                    <td><strong class="text-dark">{{ cat.name }}</strong></td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1.5 fw-bold" style="background-color: #6f42c120 !important; color: #6f42c1 !important;">
+                                            {{ cat.total_ads }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">
+                                        <i class="fa-solid fa-inbox d-block display-6 text-muted opacity-50 mb-2"></i>
+                                        Немає даних для відображення
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

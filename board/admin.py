@@ -1,6 +1,6 @@
 
 from django.contrib import admin
-from .models import Ad, Category, Comment, Profile
+from .models import Ad, Category, Comment
 
 
 class CommentInline(admin.TabularInline):
@@ -63,10 +63,3 @@ class CategoryAdmin(admin.ModelAdmin):
         return obj.active_ads_count()
 
     active_ads_count_display.short_description = "Активних оголошень"
-
-
-@admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
-    """Кастомна адмінка для профілів користувачів."""
-    list_display = ('user', 'phone', 'address')
-    search_fields = ('user__username', 'phone')

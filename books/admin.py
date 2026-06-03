@@ -1,9 +1,6 @@
 
-from django.contrib import admin
 from django.http import HttpRequest
 from typing import Any
-from .models import Book
-
 
 from django.contrib import admin
 from .models import Book

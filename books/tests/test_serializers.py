@@ -67,7 +67,7 @@ class BookSerializerTest(TestCase):
 
         self.assertFalse(serializer.is_valid())
         self.assertIn('title', serializer.errors)
-        self.assertEqual(serializer.errors['title'][0], 'This field is required.')
+        self.assertEqual(serializer.errors['title'][0], "Це поле обов'язкове.")
 
     def test_custom_validation_publication_year_in_future(self) -> None:
         """Перевірка кастомної валідації: рік видання не може бути більшим за поточний."""

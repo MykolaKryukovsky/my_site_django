@@ -1,62 +1,66 @@
-{% extends "main/base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Головна сторінка{% endblock %}
+{% block title %}Головна сторінка - MySystem{% endblock %}
 
 {% block content %}
-    <div class="jumbotron p-5 mb-4 bg-light rounded-3 shadow-sm">
-
-        <h1 class="display-5 fw-bold">{{ welcome_text|upper|default:"ВІТАЄМО НА САЙТІ!" }}</h1>
-
-        <p class="col-md-8 fs-4">{{ site_description|truncatechars:150 }}</p>
+<div class="w-100">
+    <div class="p-5 mb-4 bg-white rounded-4 shadow-sm">
+        <h1 class="display-5 fw-extrabold text-dark mb-3">{{ welcome_text|upper|default:"ВІТАЄМО НА САЙТІ!" }}</h1>
+        <p class="col-md-9 text-secondary lead fs-5 mb-0">{{ site_description|truncatechars:150 }}</p>
     </div>
 
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="h5 mb-0">{{ "Основні розділи"|upper }}</h3>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="card-header border-0 bg-primary text-white py-3">
+                    <h3 class="h6 fw-bold mb-0 text-uppercase" style="letter-spacing: 0.5px;">{{ "Основні розділи"|upper }}</h3>
                 </div>
-                <div class="list-group list-group-flush">
-                    <a href="{% url 'about' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        Про нас
-                        <span class="badge bg-secondary rounded-pill">історія</span>
+                <div class="list-group list-group-flush small">
+                    <a href="{% url 'main:about' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+                        <span class="text-dark fw-medium"><i class="bi bi-info-circle text-muted me-2"></i>Про нас</span>
+                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1.5 fw-semibold">історія</span>
                     </a>
 
-                    <a href="{% url 'services' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        Послуги
-                        <span class="badge bg-info rounded-pill">{{ services|length }} позицій</span>
+                    <a href="{% url 'main:services' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+                        <span class="text-dark fw-medium"><i class="bi bi-briefcase text-muted me-2"></i>Послуги</span>
+                        <span class="badge bg-info-subtle text-info rounded-pill px-2.5 py-1.5 fw-semibold">{{ services|length }} позицій</span>
                     </a>
-                    <a href="{% url 'contact' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        Контакти
-                        <span class="badge bg-secondary rounded-pill">зв'язок</span>
+
+                    <a href="{% url 'main:contact' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+                        <span class="text-dark fw-medium"><i class="bi bi-envelope text-muted me-2"></i>Контакти</span>
+                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1.5 fw-semibold">зв'язок</span>
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-dark text-white">
-                    <h3 class="h5 mb-0">{{ "Динамічні маршрути"|upper }}</h3>
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="card-header border-0 bg-dark text-white py-3">
+                    <h3 class="h6 fw-bold mb-0 text-uppercase" style="letter-spacing: 0.5px;">{{ "Динамічні маршрути"|upper }}</h3>
                 </div>
-                <div class="list-group list-group-flush">
+                <div class="list-group list-group-flush small">
 
-                    {% for post in posts|slice:":1" %}
-                    <a href="{% url 'post_detail' id=post.id %}" class="list-group-item list-group-item-action">
-                        <i class="bi bi-file-text"></i> {{ post.title }} <small class="text-muted">(ID: {{ post.id }})</small>
+                    {% for post in posts|slice:":2" %}
+                    <a href="{% url 'main:post_detail' post.id %}" class="list-group-item list-group-item-action py-3">
+                        <i class="bi bi-file-text text-muted me-2"></i> <span class="text-dark fw-medium">{{ post.title }}</span>
+                        <span class="badge bg-light text-muted border ms-2">ID: {{ post.id }}</span>
                     </a>
+                    {% empty %}
+                        <div class="list-group-item py-3 text-muted">Постів немає</div>
                     {% endfor %}
 
-                    <a href="{% url 'profile_detail' username='JohnDoe' %}" class="list-group-item list-group-item-action">
-                        <i class="bi bi-person"></i> Профіль {{ "JohnDoe"|lower }}
+                    <a href="{% url 'user:profile_view' 'JohnDoe' %}" class="list-group-item list-group-item-action py-3">
+                        <i class="bi bi-person text-muted me-2"></i> <span class="text-dark fw-medium">Профіль {{ "JohnDoe"|lower }}</span>
                     </a>
 
-                    <a href="{% url 'event_detail' year='2026' month='05' day='01' %}" class="list-group-item list-group-item-action">
-                        <i class="bi bi-calendar-event"></i> Спеціальна подія
-                        <small class="text-muted">({{ event_date|date:"d.m.Y"|default:"01.05.2026" }})</small>
+                    <a href="{% url 'main:event_detail' 2026 5 1 %}" class="list-group-item list-group-item-action py-3">
+                        <i class="bi bi-calendar-event text-muted me-2"></i> <span class="text-dark fw-medium">Спеціальна подія</span>
+                        <small class="text-muted ms-1">({{ event_date|date:"d.m.Y"|default:"01.05.2026" }})</small>
                     </a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

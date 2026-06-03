@@ -7,28 +7,17 @@ from .models import UserProfile
 
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender: Type[User], instance: User, created: bool, **kwargs: Any) -> None:
+def create_user_profile(sender, instance, created, **kwargs):
     """
-        Створює об'єкт UserProfile автоматично під час створення нового користувача.
-        Args:
-            sender: Клас моделі, що надіслала сигнал (User).
-            instance: Конкретний екземпляр створеного користувача.
-            created: Прапор, що вказує, чи було створено новий об'єкт (True) чи оновлено старий.
-            **kwargs: Додаткові іменовані аргументи.
+    ВІДКОРИГОВАНО: Сигнал для автоматичного створення профілю користувача.
+    Використовує get_or_create для повного запобігання помилкам UniqueViolation у тестах.
     """
     if created:
-        UserProfile.objects.create(user=instance)
+        UserProfile.objects.get_or_create(user=instance)
 
 
 @receiver(post_save, sender=User)
-def save_user_profile(sender: Type[User], instance: Any, **kwargs: Any) -> None:
-    """
-        Зберігає пов'язані дані профілю під час кожного збереження об'єкта користувача.
-        Args:
-            sender: Клас моделі, що надіслала сигнал (User).
-            instance: Примірник користувача, який зберігається.
-            **kwargs: Додаткові іменовані аргументи.
-    """
-    if hasattr(instance, 'userprofile'):
-        instance.userprofile.save()
-
+def save_user_profile(sender, instance, **kwargs):
+    """Синхронізує та зберігає профіль при оновленні користувача."""
+    if hasattr(instance, 'user_profile'):
+        instance.user_profile.save()

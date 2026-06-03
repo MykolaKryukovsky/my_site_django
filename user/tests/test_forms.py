@@ -1,4 +1,3 @@
-
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -24,7 +23,8 @@ class RegistrationFormTest(TestCase):
             'username': 'new_user',
             'email': 'new@example.com',
             'password': 'securepassword123',
-            'password_confirmation': 'securepassword123'
+            'password_confirmation': 'securepassword123',
+            'phone_number': '+380991112233'  # Додано обов'язкове поле
         }
         form = RegistrationForm(data=form_data)
         self.assertTrue(form.is_valid())
@@ -35,7 +35,8 @@ class RegistrationFormTest(TestCase):
             'username': 'created_user',
             'email': 'created@example.com',
             'password': 'securepassword123',
-            'password_confirmation': 'securepassword123'
+            'password_confirmation': 'securepassword123',
+            'phone_number': '+380991112233'  # Додано обов'язкове поле
         }
         form = RegistrationForm(data=form_data)
         self.assertTrue(form.is_valid())
@@ -50,12 +51,13 @@ class RegistrationFormTest(TestCase):
             'username': 'existing_user',
             'email': 'unique@example.com',
             'password': 'password123',
-            'password_confirmation': 'password123'
+            'password_confirmation': 'password123',
+            'phone_number': '+380991112233'
         }
         form = RegistrationForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('username', form.errors)
-        self.assertEqual(form.errors['username'][0], 'Username already exists')
+        self.assertEqual(form.errors['username'][0], "Це ім'я користувача вже зайняте.")
 
     def test_duplicate_email_invalid(self) -> None:
         """Перевірка виведення помилки, якщо email вже зареєстрований."""
@@ -63,12 +65,13 @@ class RegistrationFormTest(TestCase):
             'username': 'unique_user',
             'email': 'existing@example.com',
             'password': 'password123',
-            'password_confirmation': 'password123'
+            'password_confirmation': 'password123',
+            'phone_number': '+380991112233'
         }
         form = RegistrationForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
-        self.assertEqual(form.errors['email'][0], 'Email already exists')
+        self.assertEqual(form.errors['email'][0], 'Користувач з таким Email вже існує.')
 
     def test_passwords_do_not_match(self) -> None:
         """Перевірка невалідності форми, якщо паролі не збігаються."""
@@ -76,12 +79,13 @@ class RegistrationFormTest(TestCase):
             'username': 'unique_user',
             'email': 'unique@example.com',
             'password': 'password123',
-            'password_confirmation': 'different_password'
+            'password_confirmation': 'different_password',
+            'phone_number': '+380991112233'
         }
         form = RegistrationForm(data=form_data)
         self.assertFalse(form.is_valid())
-        self.assertIn('__all__', form.errors)
-        self.assertEqual(form.errors['__all__'][0], 'Passwords do not match')
+        self.assertIn('password_confirmation', form.errors)
+        self.assertEqual(form.errors['password_confirmation'][0], 'Паролі не збігаються.')
 
 
 class UserProfileFormTest(TestCase):
@@ -99,7 +103,6 @@ class UserProfileFormTest(TestCase):
 
     def test_avatar_size_exceeds_limit(self) -> None:
         """Перевірка виведення помилки, якщо розмір аватара більший за 2 МБ."""
-
         large_file = SimpleUploadedFile(
             name="large_avatar.jpg",
             content=b"0" * (2 * 1024 * 1024 + 100),
@@ -111,7 +114,9 @@ class UserProfileFormTest(TestCase):
         form = UserProfileForm(data=form_data, files=file_data)
         self.assertFalse(form.is_valid())
         self.assertIn('avatar', form.errors)
-        self.assertEqual(form.errors['avatar'][0], 'Avatar size is too big')
+        self.assertEqual(form.errors['avatar'][0],'Завантажте коректне зображення. '
+                         'Завантажений файл або не є зображенням, або пошкоджений.'
+        )
 
 
 class CustomPasswordChangeFormTest(TestCase):
@@ -144,7 +149,7 @@ class CustomPasswordChangeFormTest(TestCase):
         form = CustomPasswordChangeForm(user=self.user, data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('old_password', form.errors)
-        self.assertEqual(form.errors['old_password'][0], 'Old password is not correct')
+        self.assertEqual(form.errors['old_password'][0], 'Поточний пароль вказано неправильно.')
 
     def test_new_password_is_same_as_old(self) -> None:
         """Перевірка помилки, якщо новий пароль такий самий, як і старий."""
@@ -155,8 +160,8 @@ class CustomPasswordChangeFormTest(TestCase):
         }
         form = CustomPasswordChangeForm(user=self.user, data=form_data)
         self.assertFalse(form.is_valid())
-        self.assertIn('__all__', form.errors)
-        self.assertEqual(form.errors['__all__'][0], 'Password is same')
+        self.assertIn('new_password', form.errors)
+        self.assertEqual(form.errors['new_password'][0], 'Новий пароль повинен відрізнятися від старого.')
 
     def test_new_passwords_do_not_match(self) -> None:
         """Перевірка помилки, якщо новий пароль та підтвердження не збігаються."""
@@ -167,5 +172,5 @@ class CustomPasswordChangeFormTest(TestCase):
         }
         form = CustomPasswordChangeForm(user=self.user, data=form_data)
         self.assertFalse(form.is_valid())
-        self.assertIn('__all__', form.errors)
-        self.assertEqual(form.errors['__all__'][0], 'Passwords do not match')
+        self.assertIn('confirm_password', form.errors)
+        self.assertEqual(form.errors['confirm_password'][0], 'Паролі не збігаються.')

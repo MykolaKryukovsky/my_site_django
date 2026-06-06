@@ -16,4 +16,6 @@ urlpatterns = [
     path('delete/', views.delete_account_view, name='delete_account'),
     path('team/create/', views.create_project_team_view, name='create_project_team'),
     path('u/<str:username>/', views.profile_view, name='profile_view'),
+    path('cookie-demo/', views.cookie_session_demo_view, name='cookie_demo'),
+    path('cookie-demo/clear/', views.clean_cookie_session_view, name='clear_cookie_demo'),
 ]

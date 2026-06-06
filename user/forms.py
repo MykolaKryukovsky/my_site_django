@@ -226,3 +226,18 @@ class CustomPasswordChangeForm(forms.Form):
             self.add_error('confirm_password', 'Паролі не збігаються.')
 
         return cleaned_data
+
+
+class SessionFieldsForm(forms.Form):
+    """Форма для введення імені (для cookies) та віку (для сесії)."""
+    name = forms.CharField(
+        max_length=100,
+        label="Ваше ім'я",
+        widget=forms.TextInput(attrs={'placeholder': 'Введіть ім\'я'})
+    )
+    age = forms.IntegerField(
+        min_value=0,
+        max_value=120,
+        label='Ваш вік',
+        widget=forms.NumberInput(attrs={'placeholder': 'Введіть вік'})
+    )

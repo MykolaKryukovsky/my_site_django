@@ -3,20 +3,22 @@ from typing import Tuple, Any
 from django.views.decorators.clickjacking import xframe_options_deny
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import connection
-from django.urls import reverse  # Обов'язковий імпорт для побудови правильних URL-адрес
+from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django_ratelimit.decorators import ratelimit
+from urllib.parse import quote, unquote
 
 from .forms import (
     RegistrationForm,
     LoginForm,
     UserProfileForm,
     CustomPasswordChangeForm,
-    ProjectTeamForm
+    ProjectTeamForm,
+    SessionFieldsForm,
 )
 
 
@@ -157,3 +159,54 @@ def custom_handler404(request, exception=None):
 def custom_handler500(request):
     """Кастомний обробник помилки 500 для головного urls.py"""
     return render(request, 'errors/500.html', status=500)
+
+
+def cookie_session_demo_view(request: HttpRequest) -> HttpResponse:
+    """Оновлене представлення для керування сесіями та cookies."""
+    raw_user_name = request.COOKIES.get('user_name')
+    user_name = unquote(raw_user_name) if raw_user_name is not None else None
+    user_age = request.session.get('user_age')
+
+    if user_name is not None:
+        try:
+            user_age = int(user_age)
+            if user_age <= 0 or user_age > 120:
+                raise ValueError
+        except (ValueError, TypeError):
+            if 'user_age' in request.session:
+                del request.session['user_age']
+            user_age = None
+
+    form = SessionFieldsForm
+
+    if request.method == 'POST':
+        form = SessionFieldsForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            age = form.cleaned_data['age']
+            request.session['user_age'] = age
+            response = redirect(reverse('user:cookie_demo'))
+            safe_name = quote(name)
+            response.set_cookie('user_name', safe_name, max_age=600, httponly=True, samesite='Lax')
+            return response
+
+    response = render(request, 'user/cookie_demo.html', {
+        'form': form,
+        'user_name': user_name,
+        'user_age': user_age
+     })
+
+    if user_name:
+        response.set_cookie('user_name', quote(user_name), max_age=600, httponly=True, samesite='Lax')
+
+    return response
+
+
+def clean_cookie_session_view(request: HttpRequest) -> HttpResponse:
+    """Повне очищення сесії та cookies (Кнопка 'Вийти')."""
+    if 'user_age' in request.session:
+        del request.session['user_age']
+
+    response = redirect(reverse('user:cookie_demo'))
+    response.delete_cookie('user_name')
+    return response

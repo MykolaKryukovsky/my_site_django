@@ -1,3 +1,4 @@
+import time
 import logging
 from typing import Callable, Optional
 from django.http import HttpRequest, HttpResponse
@@ -21,11 +22,14 @@ class AuditAccessMiddleware:
         """Обробляє вхідний запит та логує інформацію про доступ."""
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         ip_address = x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR', '0.0.0.0')
-
         user_status = f"User: {request.user.username}" if request.user.is_authenticated else "Anonymous"
-        logger.info(f"[ACCESS] IP: {ip_address} | {user_status} | Method: {request.method} | Path: {request.path}")
-
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S")
+        logger.info(
+            f"[ACCESS] IP: {ip_address} | {user_status} | Method: {request.method} | Path: {request.path}",
+            extra={'add_time': current_time}
+        )
         response = self.get_response(request)
+
         return response
 
 

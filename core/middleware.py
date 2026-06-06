@@ -1,4 +1,4 @@
-
+import time
 import logging
 from django.http import HttpRequest, HttpResponse
 from django.core.cache import cache
@@ -48,6 +48,7 @@ class RequestMetricsMiddleware:
             f"Запит #{total_requests} | Метод: {request.method} | "
             f"Шлях: {request.path} | Статус: {response.status_code} | {user_status}"
         )
-        logger.info(log_message)
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S")
+        logger.info(log_message, extra={'add_time': current_time})
 
         return response

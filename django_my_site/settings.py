@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+import pymongo
 
 # Побудова шляхів всередині проєкту
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'debug_toolbar',
 
     # Ваші локальні додатки (Застосунки)
     'main',
@@ -67,7 +69,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # 1. Centralized Error Handling (Must be first!)
     'user.middleware.ErrorHandlingMiddleware',
-
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -82,6 +84,7 @@ MIDDLEWARE = [
     'core.middleware.RequestMetricsMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'books.middleware.AnonymousBooksCacheMiddleware',
     'allauth.account.middleware.AccountMiddleware',
 ]
 
@@ -122,8 +125,9 @@ DATABASES = {
 # КРИТИЧНО НЕОБХІДНО: Налаштування кешу для лімітів @ratelimit та пакету Axes
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+        'TIMEOUT': 300, # Кэш по умолчанию живет 5 минут
     }
 }
 
@@ -148,6 +152,12 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MONGO_CLIENT = pymongo.MongoClient("mongodb://localhost:27017/")
+# Створюємо або підключаємо базу даних 'library_nosql'
+MONGO_DB = MONGO_CLIENT["library_nosql"]
+# Колекція (аналог таблиці) для книг із гнучкими атрибутами
+MONGO_BOOKS_COLLECTION = MONGO_DB["books_attributes"]
 
 # Налаштування для django-allauth
 AUTHENTICATION_BACKENDS = [
@@ -244,7 +254,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '[%(add_time)s] %(levelname)s: %(message)s',
+            'format': '%(asctime)s [%(levelname)s] %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S'
         },
     },
@@ -287,3 +297,42 @@ LOGGING = {
         },
     },
 }
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+    'localhost',
+]
+
+# --- НАСТРОЙКИ CELERY ---
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+# --- НАСТРОЙКИ ОТПРАВКИ EMAIL ---
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = '://gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_USER', 'your_email@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD', 'your_app_password')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+if 'test' in sys.argv:
+    # Перемикаємо кєш на оперативну пам'ять (якщо не було додано раніше)
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake-cache',
+        }
+    }
+
+    # Видаляємо дебаг-панель із списку Middleware, щоб вона не перехоплювала запити
+    if 'debug_toolbar.middleware.DebugToolbarMiddleware' in MIDDLEWARE:
+        MIDDLEWARE = [m for m in MIDDLEWARE if m != 'debug_toolbar.middleware.DebugToolbarMiddleware']
+
+    # Видаляємо дебаг-панель із встановлених додатків
+    if 'debug_toolbar' in INSTALLED_APPS:
+        INSTALLED_APPS = [app for app in INSTALLED_APPS if app != 'debug_toolbar']

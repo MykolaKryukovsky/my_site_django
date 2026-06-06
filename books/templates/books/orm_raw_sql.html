@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Використання Raw SQL - MySystem{% endblock %}
+
+{% block content %}
+<div class="row w-100 g-4">
+
+    <div class="col-12">
+        <div class="card bg-white border-0 shadow-sm rounded-4 p-4">
+            <h4 class="h5 fw-bold text-dark mb-3">🔍 Налаштування ліміту відгуків</h4>
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-sm-6 col-md-4">
+                    <label class="form-label small text-muted">Мінімальна кількість відгуків у книги автора</label>
+                    <input type="number" name="limit" class="form-control rounded-3" value="{{ current_limit }}" min="0">
+                </div>
+                <div class="col-sm-6 col-md-3 align-self-end">
+                    <button type="submit" class="btn btn-primary w-100 rounded-3 fw-semibold">Застосувати SQL-фільтр</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+            <h4 class="h5 fw-bold text-dark mb-1">👤 Популярні автори (Raw SQL)</h4>
+            <p class="text-muted small mb-3">Автори, чиї книги набрали більше ніж {{ current_limit }} рецензій</p>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 100px;" class="text-secondary fw-bold">ID</th>
+                            <th class="text-secondary fw-bold">Ім'я автора</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for author in authors %}
+                            <tr>
+                                <td><span class="text-muted font-monospace">#{{ author.id }}</span></td>
+                                <td><strong class="text-dark">{{ author.name }}</strong></td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted py-4">Не знайдено авторів із такою кількістю відгуків.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+            <h4 class="h5 fw-bold text-dark mb-1">📊 Кількість книг за жанрами (Raw Cursor)</h4>
+            <p class="text-muted small mb-3">Прямий підрахунок за допомогою connection.cursor()</p>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-secondary fw-bold">Жанр</th>
+                            <th class="text-center text-secondary fw-bold" style="width: 150px;">Усього книг</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in genres_stats %}
+                            <tr>
+                                <td><span class="fw-semibold text-dark">{{ stat.genre }}</span></td>
+                                <td class="text-center"><span class="badge bg-primary-subtle text-primary font-bold px-3 py-1.5 rounded-pill" style="background-color: #0d6efd15 !important;">{{ stat.total_books }}</span></td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted py-4">Немає даних.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

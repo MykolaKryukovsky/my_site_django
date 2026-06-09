@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'core',
     'user',
     'books.apps.LibraryConfig',
+    'todo',
+    'shop',
 
     # Сторонні пакети
     'rest_framework',

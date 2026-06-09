@@ -15,6 +15,7 @@ from board import views as board_views
 from core.views import SystemDashboardView
 
 from board.views_api import AdViewSet
+from .api import api as ninja_api
 
 
 router = DefaultRouter()
@@ -35,6 +36,7 @@ urlpatterns = [
     path('api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('api/', include(router.urls)),
+    path('api/v2/', ninja_api.urls),
 ]
 
 handler404 = 'user.views.custom_handler404'

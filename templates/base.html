@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+{% load core_tags %}
+
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Django Auth{% endblock %}</title>
+
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <link href="https://jsdelivr.net" rel="stylesheet">
+</head>
+<body class="bg-light text-dark d-flex flex-column min-vh-100">
+
+    <div class="container mt-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm p-3 rounded-4">
+            <div class="container-fluid px-0 d-flex justify-content-between align-items-center">
+                <a href="{% url 'main:home' %}" class="navbar-brand fw-bold text-primary fs-4 m-0">DjangoDRY</a>
+
+                <div class="d-flex align-items-center gap-3">
+                    <a href="{% url 'main:home' %}" class="nav-link text-secondary hover-primary transition {% active_link 'main:home' %}">Головна</a>
+                    <a href="{% url 'board:index_view' %}" class="nav-link text-secondary hover-primary transition {% active_link 'board:index_view' %}">Оголошення</a>
+
+                    {% if user.is_authenticated %}
+                        <span class="text-muted small">Привіт, <strong class="text-dark">{{ user.username }}</strong>!</span>
+                        <a href="{% url 'user:logout' %}" class="btn btn-danger btn-sm px-3 rounded-3 shadow-sm fw-medium">Вийти</a>
+                    {% else %}
+                        <a href="{% url 'user:login' %}" class="btn btn-link text-secondary text-decoration-none px-2 small fw-medium {% active_link 'user:login' %}">Увійти</a>
+                        <a href="{% url 'user:register' %}" class="btn btn-primary btn-sm px-3 rounded-3 shadow-sm fw-semibold {% active_link 'user:register' %}">Реєстрація</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    {% if messages %}
+        <div class="container mt-3" style="max-width: 550px;">
+            <div class="d-flex flex-column gap-2">
+                {% for message in messages %}
+                    <div class="alert shadow-sm alert-dismissible fade show m-0 {% if 'error' in message.tags or 'danger' in message.tags %}alert-danger{% else %}alert-success{% endif %}" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <main class="flex-grow-1 d-flex align-items-center justify-content-center p-3">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://jsdelivr.net"></script>
+
+    <style>
+        .hover-primary:hover { color: #0d6efd !important; transition: color 0.2s ease-in-out; }
+    </style>
+</body>
+</html>

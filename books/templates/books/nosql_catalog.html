@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}NoSQL Каталог (MongoDB) - MySystem{% endblock %}
+
+{% block content %}
+<div class="row w-100 g-4">
+
+    <div class="col-md-4">
+        <div class="card bg-white border-0 shadow-sm rounded-4 p-4">
+            <h4 class="h5 fw-bold text-dark mb-3">➕ Додати NoSQL атрибути</h4>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-2">
+                    <label class="form-label small text-muted">ID книги</label>
+                    <input type="text" name="book_id" class="form-control form-control-sm rounded-3" placeholder="Унікальний ключ" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small text-muted">Назва книги</label>
+                    <input type="text" name="title" class="form-control form-control-sm rounded-3" placeholder="Назва" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small text-muted">Тип обкладинки</label>
+                    <select name="cover_type" class="form-select form-select-sm rounded-3">
+                        <option value="Тверда">Тверда</option>
+                        <option value="М'яка">М'яка</option>
+                        <option value="Електронна">Електронна</option>
+                    </select>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label small text-muted">Сторінок</label>
+                        <input type="number" name="pages" class="form-control form-control-sm rounded-3" value="150">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-muted">Вага (г)</label>
+                        <input type="number" name="weight_g" class="form-control form-control-sm rounded-3" value="300">
+                    </div>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="has_illustrations" id="illusSwitch" checked>
+                    <label class="form-check-input-label small text-dark" for="illusSwitch">Наявність ілюстрацій</label>
+                </div>
+                <button type="submit" class="btn btn-success btn-sm w-100 rounded-3 fw-semibold">Зберегти в MongoDB</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+            <h4 class="h5 fw-bold text-dark mb-1">🍃 Документи з колекції MongoDB</h4>
+            <p class="text-muted small mb-3">Дані читаються з NoSQL сховища миттєво без виконання SQL JOIN операцій</p>
+
+            <div class="row g-3">
+                {% for b in nosql_books %}
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-light rounded-3 border-0 position-relative">
+                            <span class="badge bg-secondary font-monospace position-absolute top-0 end-0 m-2 small">ID: {{ b.book_id }}</span>
+                            <h6 class="fw-bold text-dark mb-2 pe-5">{{ b.title }}</h6>
+                            <ul class="list-unstyled mb-0 small text-muted">
+                                <li>📘 Обкладинка: <strong>{{ b.attributes.cover_type }}</strong></li>
+                                <li>📄 Сторінок: <strong>{{ b.attributes.pages }}</strong></li>
+                                <li>⚖️ Вага: <strong>{{ b.attributes.weight_g }} г</strong></li>
+                                <li>🎨 Ілюстрації: <strong>{% if b.attributes.has_illustrations %}Є{% else %}Ні{% endif %}</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12 text-center text-muted py-5">Колекція MongoDB порожня. Додайте перший документ через форму зліва!</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

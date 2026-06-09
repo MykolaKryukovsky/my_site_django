@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Демо сесій та Cookies - MySystem{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 bg-white w-full" style="max-width: 500px;">
+
+    <div class="text-center mb-4">
+        <h2 class="h3 fw-bold text-dark mb-2">Сесії та Cookies</h2>
+        <p class="text-muted small">Ім'я зберігається в Cookie, а вік — у сесії бази даних</p>
+    </div>
+    
+    {% if user_name or user_age %}
+        <div class="alert alert-primary text-center shadow-sm rounded-3 p-3 mb-4">
+            <h5 class="fw-bold mb-1">
+                Привіт, {% if user_name %}{{ user_name }}{% else %}Гість{% endif %}!
+            </h5>
+            {% if user_age %}
+                <p class="small mb-0 text-secondary">Вам успішно виповнилося <strong>{{ user_age }}</strong> років.</p>
+            {% endif %}
+
+            <div class="mt-3">
+                <a href="{% url 'user:clear_cookie_demo' %}" class="btn btn-sm btn-outline-danger rounded-2 px-3 fw-semibold">
+                    Вийти (Очистити дані)
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% include 'includes/form_snippet.html' %}
+
+        <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm rounded-3 mt-4 fw-semibold">
+            Зберегти дані
+        </button>
+    </form>
+
+</div>
+
+<script>
+    document.querySelectorAll('.form-field-container').forEach(function(container) {
+        const element = container.querySelector('input');
+        if (element) { element.classList.add('form-control'); }
+    });
+</script>
+{% endblock %}

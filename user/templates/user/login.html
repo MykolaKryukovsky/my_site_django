@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Вхід{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
+    <div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 w-full bg-white" style="max-width: 450px;">
+        <h2 class="h3 fw-bold text-center text-dark mb-4">Вхід у систему</h2>
+
+        <form method="post" novalidate>
+            {% csrf_token %} <!-- Хорошая практика: явно добавить CSRF, если его нет внутри сниппета -->
+
+            {% include 'includes/form_snippet.html' %}
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                    Увійти
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Этот скрипт сделает инпуты из сниппета красивыми в стиле Bootstrap
+    document.querySelectorAll('.form-field-container').forEach(function(container) {
+        const element = container.querySelector('input, select, textarea');
+        if (!element) return;
+
+        if (element.tagName.toLowerCase() === 'select') {
+            element.classList.add('form-select');
+        } else {
+            element.classList.add('form-control');
+        }
+
+        if (container.getAttribute('data-has-errors') === 'true') {
+            element.classList.add('is-invalid');
+        }
+    });
+</script>
+{% endblock %}

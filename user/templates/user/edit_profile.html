@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Редагування профілю - MySystem{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 bg-white w-full" style="max-width: 550px;">
+
+    <div class="text-center mb-4">
+        <h2 class="h3 fw-bold text-dark mb-2">Налаштування профілю</h2>
+        <p class="text-muted small">Оновіть свою інформацію, щоб залишатися на зв'язку</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger shadow-sm py-2 mb-3">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+        {% endif %}
+
+        {% include 'includes/form_snippet.html' %}
+
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-2">
+            <a href="{% url 'user:profile_view' username=request.user.username %}" class="btn btn-link text-secondary text-decoration-none small">
+                ← Скасувати
+            </a>
+            <button type="submit" class="btn btn-primary btn-lg px-4 shadow-sm rounded-3 fs-6 fw-semibold">
+                Зберегти зміни
+            </button>
+        </div>
+    </form>
+
+</div>
+
+<script>
+    // Розумний скрипт для автоматичної стилізації полів Django під Bootstrap 5
+    document.querySelectorAll('.form-field-container').forEach(function(container) {
+        const element = container.querySelector('input, select, textarea');
+        if (!element) return;
+
+        // Визначаємо правильний клас залежно від типу поля
+        if (element.tagName.toLowerCase() === 'select') {
+            element.classList.add('form-select');
+        } else if (element.type === 'checkbox' || element.type === 'radio') {
+            element.classList.add('form-check-input');
+            // Переносимо чекбокс ліворуч від лейбла, якщо це потрібно для Bootstrap-стилю
+            container.classList.add('form-check');
+        } else if (element.type === 'file') {
+            element.classList.add('form-control');
+        } else {
+            element.classList.add('form-control');
+        }
+
+        // Обробка помилок валідації
+        if (container.getAttribute('data-has-errors') === 'true' || container.querySelector('.invalid-feedback')) {
+            element.classList.add('is-invalid');
+        }
+    });
+</script>
+{% endblock %}

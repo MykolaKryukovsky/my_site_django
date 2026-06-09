@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Новинки за місяць - MySystem{% endblock %}
+
+{% block content %}
+<div class="w-100 py-3 text-start">
+    <div class="mb-4">
+        <h1 class="h2 fw-extrabold text-dark mb-1"><i class="bi bi-fire text-danger me-1"></i> Гарячі новинки</h1>
+        <p class="text-muted small">Опубліковано за останні 30 днів: <strong>{{ recent_stats.total_count }} товарів</strong> на суму <strong>{{ recent_stats.total_sum|default:0 }} грн</strong></p>
+    </div>
+
+    <div class="row g-3">
+        {% for ad in ads %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 bg-white p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="badge bg-danger-subtle text-danger rounded-2 px-2 py-1 small fw-bold mb-2">НОВИНКА</span>
+                        <h5 class="h6 fw-bold text-dark mb-2">
+                            <a href="{% url 'board:ad_detail' ad.id %}" class="text-decoration-none text-dark">{{ ad.title }}</a>
+                        </h5>
+                        <p class="text-secondary small mb-3">{{ ad.short_description }}</p>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3 border-top pt-2">
+                        <span class="fw-extrabold text-primary m-0">{{ ad.price }} грн</span>
+                        <a href="{% url 'board:ad_detail' ad.id %}" class="btn btn-light border btn-sm rounded-3 px-3">Детальніше</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm">
+                <p class="text-muted small mb-0">За останні 30 днів нових надходжень не було.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

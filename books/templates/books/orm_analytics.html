@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Глибоке занурення в ORM - MySystem{% endblock %}
+
+{% block content %}
+<div class="row w-100 g-4">
+
+    <div class="col-12">
+        <div class="card bg-white border-0 shadow-sm rounded-4 p-4">
+            <h4 class="h5 fw-bold text-dark mb-1">✍️ Аналітика авторів (Рейтинг та об'єми)</h4>
+            <p class="text-muted small mb-3">Середній рейтинг книг автора та загальна кількість видань у системі</p>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-secondary fw-bold">Автор</th>
+                            <th class="text-center text-secondary fw-bold" style="width: 200px;">Кількість книг</th>
+                            <th class="text-center text-secondary fw-bold" style="width: 200px;">Середній рейтинг</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for author in authors_analytics %}
+                            <tr>
+                                <td><strong class="text-dark">{{ author.name }}</strong></td>
+                                <td class="text-center"><span class="badge bg-secondary rounded-pill px-3">{{ author.total_books }}</span></td>
+                                <td class="text-center">
+                                    <strong class="text-primary">{{ author.author_avg_rating|default:0|floatformat:2 }} / 5</strong>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card bg-white border-0 shadow-sm rounded-4 p-4">
+            <h4 class="h5 fw-bold text-dark mb-1">📚 Книги, відсортовані за популярністю та оцінками</h4>
+            <p class="text-muted small mb-3">Пріоритет сортування: Кількість відгуків (DESC) ➡️ Середня оцінка (DESC)</p>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-secondary fw-bold">Назва книги</th>
+                            <th class="text-secondary fw-bold">Автор</th>
+                            <th class="text-center text-secondary fw-bold" style="width: 200px;">Кількість відгуків</th>
+                            <th class="text-center text-secondary fw-bold" style="width: 200px;">Середня оцінка</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in books %}
+                            <tr>
+                                <td><strong class="text-dark">{{ book.title }}</strong></td>
+                                <td><span class="text-muted">{{ book.author_rel.name|default:"Невідомо" }}</span></td>
+                                <td class="text-center">
+                                    <span class="badge bg-info-subtle text-info rounded-pill px-3 fw-bold">{{ book.total_reviews }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-success-subtle text-success rounded-pill px-3 fw-bold">
+                                        ⭐ {{ book.average_rating|default:0|floatformat:2 }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

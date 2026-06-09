@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Імпорт CSV - MySystem{% endblock %}
+{% block content %}
+<div class="card shadow-lg border-0 rounded-4 p-4 bg-white" style="max-width: 500px;">
+    <h4 class="fw-bold text-dark mb-2">📥 Імпорт книг через CSV</h4>
+    <p class="text-muted small mb-4">Оберіть файл для запуску асинхронної обробки Celery</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include 'includes/form_snippet.html' %}
+        <button type="submit" class="btn btn-primary w-100 rounded-3 mt-3 fw-semibold">Запустити імпорт</button>
+    </form>
+</div>
+{% endblock %}

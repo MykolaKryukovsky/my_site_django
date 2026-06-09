@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Кешований каталог книг - MySystem{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0 rounded-4 p-4 bg-white w-full" style="max-width: 650px;">
+
+    <h2 class="h4 fw-bold text-dark mb-1">📖 Кешований каталог книг</h2>
+    <p class="text-muted small mb-4">Демонстрація низькорівневого кэшування та сигналів інвалідації</p>
+
+    <div class="mb-4">
+        {% if from_cache %}
+            <span class="badge bg-success text-white px-3 py-2 rounded-3 shadow-sm fs-6">
+                <i class="fa-solid fa-bolt me-1"></i> Дані завантажено з КЕШУ (0 SQL запитів)
+            </span>
+        {% else %}
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-3 shadow-sm fs-6">
+                <i class="fa-solid fa-database me-1"></i> Кєш порожній. Дані завантажено з БД!
+            </span>
+        {% endif %}
+    </div>
+
+    <div class="list-group rounded-3 shadow-sm">
+        {% for book in books %}
+            <div class="list-group-item list-group-item-action p-3">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="fw-bold mb-1 text-dark">{{ book.title }}</h6>
+                    <small class="text-secondary font-monospace">{{ book.genre }}</small>
+                </div>
+                <p class="mb-1 text-muted small">Автор: <strong>{{ book.author_rel.name|default:"Невідомо" }}</strong></p>
+                <small class="text-muted" style="font-size: 0.7rem;">Рік видання: {{ book.publication_year }} | ISBN: {{ book.isbn }}</small>
+            </div>
+        {% empty %}
+            <div class="text-center p-4 text-muted">Каталог книг порожній.</div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

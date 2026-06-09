@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load cache %}
+
+{% block title %}Оптимізація ORM Запитів - MySystem{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 bg-white w-full" style="max-width: 750px;">
+
+    <h2 class="h3 fw-bold text-center text-dark mb-2">Тестування продуктивності Django ORM</h2>
+    <p class="text-muted text-center small mb-4">Порівняння методів завантаження пов'язаних моделей за допомогою ListView</p>
+
+    <div class="row g-3 mb-4 text-center">
+        <div class="col-6">
+            <div class="p-3 bg-danger-subtle text-danger rounded-4 border border-danger-subtle h-100">
+                <h6 class="fw-bold mb-1 small text-uppercase">Без оптимізації (N+1)</h6>
+                <div class="h3 fw-extrabold my-1">{{ slow_queries }} <span class="fs-6 fw-normal">запитів</span></div>
+                <div class="small fw-medium">Час: {{ slow_time }} мс</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="p-3 bg-success-subtle text-success rounded-4 border border-success-subtle h-100">
+                <h6 class="fw-bold mb-1 small text-uppercase">З оптимізацією</h6>
+                <div class="h3 fw-extrabold my-1">{{ fast_queries }} <span class="fs-6 fw-normal">запити</span></div>
+                <div class="small fw-medium">Час: {{ fast_time }} мс</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-primary text-center rounded-3 p-2 fw-semibold small mb-4">
+        🚀 Оптимізована вибірка через класи спрацювала в <strong>{{ boost }} рази</strong> швидше!
+    </div>
+
+    <h5 class="fw-bold text-dark mb-3 small text-uppercase"><i class="fa-solid fa-list me-1"></i> Згенерований каталог:</h5>
+
+    {% cache 600 books_perf_list_fragment %}
+    <div style="max-height: 250px; overflow-y: auto;" class="border rounded-3 p-3 bg-light">
+        {% for book in books %}
+            <div class="mb-3 border-bottom pb-2">
+                <div class="d-flex justify-content-between">
+                    <strong class="text-dark small">{{ book.title }}</strong>
+                    <span class="badge bg-secondary-subtle text-secondary rounded-2 px-2 py-0.5" style="font-size: 0.75rem;">
+                        {{ book.author }}
+                    </span>
+                </div>
+
+                <ul class="mb-0 mt-1 text-muted font-monospace" style="font-size: 0.75rem; list-style-type: square;">
+                    {% for rev in book.reviews.all %}
+                        <li>{{ rev.content }} (Оцінка: {{ rev.rating }}/5)</li>
+                    {% empty %}
+                        <li class="text-muted">Рецензій на цю книгу ще немає.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+    {% endcache %}
+
+</div>
+{% endblock %}

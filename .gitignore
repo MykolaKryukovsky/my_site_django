@@ -1,6 +1,34 @@
+# Python
 __pycache__/
-*.pyc
-db.sqlite3
-.idea/
+**/__pycache__/
+*.py[cod]
+*$py.class
+venv/
 .venv/
 env/
+
+# Django
+db.sqlite3
+*.sqlite3
+media/
+staticfiles/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+postgres_data/
+pgdata/
+
+*.log
+
+media/
+staticfiles/
+
+key.pem
+cert.pem
+mkcert.exe
+cert.crt
+cert.key

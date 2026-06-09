@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Видалення акаунту - MySystem{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 text-center bg-white w-full" style="max-width: 500px;">
+
+    <div class="mb-4">
+        <div class="display-4 text-danger">
+
+            <span style="font-size: 3.5rem;">⚠️</span>
+        </div>
+    </div>
+
+    <h1 class="h3 mb-3 fw-bold text-dark">Ви впевнені?</h1>
+
+    <div class="alert alert-danger border-0 shadow-sm mb-4 text-start">
+        <p class="mb-0 small">Ця дія є <strong>незворотною</strong>. Усі ваші дані, налаштування та профілі будуть видалені назавжди.</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-danger btn-lg shadow-sm rounded-3 fw-semibold">
+                Так, видалити мій акаунт
+            </button>
+            <a href="{% url 'user:profile_view' username=request.user.username %}" class="btn btn-light border rounded-3 text-muted mt-1">
+                Скасувати
+            </a>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

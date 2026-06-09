@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Перегляд поста № {{ id }} - MySystem{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center w-100">
+    <div class="col-lg-10 col-xl-9">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'main:home' %}" class="text-decoration-none">Головна</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Пост № {{ id }}</li>
+            </ol>
+        </nav>
+
+        <article>
+            <header class="mb-4 text-start">
+                <h1 class="h2 fw-extrabold text-dark mb-2">Пост № {{ id }}</h1>
+                <div class="text-muted small fst-italic mb-3"><i class="bi bi-calendar3 me-1"></i> Опубліковано 4 травня 2026 року</div>
+
+                <div class="d-flex gap-1 mb-2">
+                    <span class="badge bg-primary-subtle text-primary rounded-2 px-2.5 py-1.5 fw-semibold small">Django</span>
+                    <span class="badge bg-secondary-subtle text-secondary rounded-2 px-2.5 py-1.5 fw-semibold small">Tutorial</span>
+                </div>
+            </header>
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-body p-4 text-start">
+                    <p class="lead text-dark mb-4">Ви переглядаєте пост № <strong class="text-primary">{{ id }}</strong>.</p>
+                    <p class="text-secondary">Тут відображається детальна інформація про вибрану публікацію. В реальному проекті дані для цього поста будуть завантажуватися з бази даних за допомогою переданого ID.</p>
+                    <p class="text-secondary mb-0">Django дозволяє легко створювати такі сторінки, використовуючи динамічні URL-адреси. Це робить ваш сайт гнучким та масштабованим.</p>
+                </div>
+            </div>
+        </article>
+
+        <hr class="text-muted opacity-25 my-4">
+
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+            <a href="{% url 'main:home' %}" class="btn btn-light border rounded-3 px-4 text-muted shadow-sm w-100 w-sm-auto">
+                <i class="bi bi-arrow-left me-1"></i> На головну
+            </a>
+
+            <div class="d-flex gap-2 w-100 w-sm-auto justify-content-end">
+                <button class="btn btn-outline-primary rounded-3 px-4 fw-medium shadow-sm w-50 w-sm-auto">
+                    <i class="bi bi-pencil me-1"></i> Редагувати
+                </button>
+                <button class="btn btn-danger rounded-3 px-4 fw-medium shadow-sm w-50 w-sm-auto">
+                    <i class="bi bi-trash me-1"></i> Видалити
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

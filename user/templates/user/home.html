@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Головна - MySystem{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0 rounded-4 p-4 p-md-5 text-center bg-white w-full" style="max-width: 550px;">
+
+    <h2 class="h2 fw-bold text-dark mb-4">Ласкаво просимо до системи!</h2>
+
+    {% if user.is_authenticated %}
+        <p class="text-muted mb-4">Ви успішно авторизувалися. Всі захищені функції програми тепер доступні.</p>
+        <div class="d-grid gap-2">
+            <a href="{% url 'user:profile_view' username=user.username %}" class="btn btn-primary btn-lg shadow-sm rounded-3">
+                Перейти в особистий кабінет
+            </a>
+        </div>
+    {% else %}
+        <p class="text-muted mb-4">Щоб отримати доступ до системи, виконайте вхід або створіть новий обліковий запис.</p>
+
+        <div class="row g-3">
+            <div class="col-6">
+                <a href="{% url 'user:login' %}" class="btn btn-primary w-100 py-2.5 fw-semibold shadow-sm rounded-3">
+                    Увійти
+                </a>
+            </div>
+            <div class="col-6">
+                <a href="{% url 'user:register' %}" class="btn btn-light border w-100 py-2.5 fw-semibold shadow-sm rounded-3">
+                    Реєстрація
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
